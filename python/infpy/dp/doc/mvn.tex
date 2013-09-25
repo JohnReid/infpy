@@ -1,0 +1,94 @@
+\documentclass{article}
+\begin{document}
+
+We describe how to parameterise a multivariate normal distribution with diagonal covariance so that the parameters describe an exponential family of distributions
+
+\begin{eqnarray*}
+	E[a(\eta_{i})|\tau_{i}] 
+& = &
+	\int{
+		a(\eta_{i})
+		p(\eta_{i}|\tau_{i})
+		d\eta_{i}
+	} \\
+& = &
+	\int{
+		\sum_{j}{ \frac{\mu_{j}^2}{\sigma_{j}^{2}} }
+		\log(2 \pi \prod_{j}{ \sigma_{j}^{2} })
+		p(\eta_{i}|\tau_{i})
+		d\eta_{i}
+	} \\
+\end{eqnarray*}
+
+
+\begin{eqnarray*}
+x & = & [ x_{1}, \ldots, x_{d} ] \\
+\mu & = & [ \mu_{1}, \ldots, \mu_{d} ] \\
+\Sigma & = & diag(\sigma_{i}^{2}) \\
+\Sigma^{-1} & = & diag(\frac{1}{\sigma_{i}^{2}}) \\
+|\Sigma| & = & \prod_{i}{\sigma_{i}^{2}} \\
+x^{T} \Sigma^{-1} x & = & \sum_{i}\frac{ x_{i}^{2} }{ \sigma_{i}^{2} } \\
+\mu^{T} \Sigma^{-1} \mu & = & \sum_{i}\frac{ \mu_{i}^{2} }{ \sigma_{i}^{2} } \\
+\eta & = & 
+	[
+		\mu_{1}^{2}, \ldots, \mu_{d}^{2}, 
+		\frac{1}{\sigma_{1}^{2}}, \ldots, \frac{1}{\sigma_{d}^{2}}
+	] \\
+T(x) & = & 
+	[ 0, \ldots, 0, \frac{-x_{1}^{2}}{2}, \ldots, \frac{-x_{d}^{2}}{2} ] \\
+\eta^{T} T(x) & = & -\frac{1}{2}x^{T} \Sigma^{-1} x \\
+p(x|\mu,\Sigma) & = & 
+	\frac{ 1 }{ (2 \pi)^{d/2} |\Sigma|^{1/2} }
+	\exp\big[
+		-
+		\frac{1}{2}
+		(x-\mu)^{T}
+		\Sigma^{-1}
+		(x-\mu)
+	\big] \\
+ & = &
+	\frac{ 1 }{ (2 \pi)^{d/2} |\Sigma|^{1/2} }
+	\exp\big[
+		-
+		\frac{1}{2}
+		\sum_{i}{
+			\frac{(x_{i} - \mu_{i})^2}{\sigma_{i}^{2}}
+		}
+	\big] \\
+ & = &
+	\exp\big[
+		-
+		\frac{1}{2}
+		x^{T}
+		\Sigma^{-1}
+		x
+		-
+		\frac{1}{2}
+		\mu^{T}
+		\Sigma^{-1}
+		\mu
+		-
+		\log[ (2 \pi)^{d/2} |\Sigma|^{1/2} ]
+	\big] \\
+ & = & \exp\big[ \eta^{T} T(x) - a(\eta) \big] \\
+a(\eta) & = &
+	\frac{1}{2} \mu^{T} \Sigma^{-1} \mu
+	+ \log[(2 \pi)^{d/2} |\Sigma|^{1/2}] \\                                
+	& = &
+	\frac{1}{2} \mu^{T} \Sigma^{-1} \mu
+	+ \frac{d}{2}\log(2 \pi) 
+	+ \frac{1}{2}log(|\Sigma|) \\
+	& = &
+	\frac{1}{2}\bigg[
+		\sum_{i}\frac{ \mu_{i}^{2} }{ \sigma_{i}^{2} }
+		+ d \log(2 \pi)
+		+ \log(\prod_{i}{\sigma_{i}^{2}}) 
+	\bigg] \\
+	& = &
+	\frac{1}{2}\bigg[
+		d \log(2 \pi)
+		+ \sum_{i}{\frac{ \mu_{i}^{2} }{ \sigma_{i}^{2} } + \log[\sigma_{i}^{2}]}
+	\bigg] \\
+\end{eqnarray*}
+
+\end{document}

@@ -1,0 +1,45 @@
+#!/bin/bash -e
+
+
+#
+# Configuration
+#
+UPLOAD_URL="http://pypi.python.org/pypi?%3Aaction=pkg_edit&name=infpy"
+HOST=xenakis
+DIR=htdocs/infpy
+
+
+#
+# Check everything is checked in
+#
+if [ "$(svn st)" != "" ]
+then
+  svn st
+  echo "You need to check in everything before updating distribution."
+  exit -1
+fi
+
+
+#
+# Update the documentation and upload to pypi and our web host
+#
+python setup.py build_sphinx
+find docs/build/ -depth -empty -delete # need to remove empty dirs for bug in upload_sphinx
+python setup.py upload_sphinx
+scp -r docs/build/html/* $HOST:$DIR/docs/build/html/
+
+
+#
+# Upload source build to pypi and our web host
+#
+python setup.py sdist upload --sign
+PACKAGE=$(ls -rt dist|tail -1) # get the latest package in dist/
+scp dist/$PACKAGE $HOST:$DIR/dist/
+
+
+#
+# Remind user
+#
+echo "**************************************************************************"
+echo "* Now is a good time to update the release number in the python package. *"
+echo "**************************************************************************"

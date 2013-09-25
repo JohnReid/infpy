@@ -1,0 +1,17 @@
+*Infpy* is a python package I have put together that implements some of the algorithms I (John Reid) 
+have used in my research. In particular it has a Gaussian process package that is largely based on 
+the excellent book, `Gaussian Processes for Machine Learning`__ by Rasmussen and Williams. 
+
+__ http://www.amazon.co.uk/Gaussian-Processes-Learning-Adaptive-Computation/dp/026218253X/
+
+The Gaussian process package is the only infpy package that is extensively documented so far but you are 
+welcome to try out the others. The Gaussian process package has the following attributes:
+
+- *noisy* data is easily modelled
+- many different *kernels* are supported out of the box allowing many models to be tested
+- kernel *composition* (point-wise sum and product) is intuitive permitting rapid model evaluation 
+- *maximum likelihood* estimation of hyper-parameters facilitates model comparison
+- *numpy* integration allows easy interoperability with other python scientific toolkits
+- high quality *matplotlib* plots are easy to create
+- best of both worlds : ease of using an interpreted language but all performance critical linear algebra performed in *compiled code*
+

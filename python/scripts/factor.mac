@@ -1,0 +1,18 @@
+-(gamma*(x-mu)**2-log(2*pi)+log(gamma))/2;
+facsum(%, x, x**2);
+divide(%, x**2);
+divide(%[2], x);
+divide(%[2], 1);
+
+-(gamma*(x-mu)**2-log(2*pi)+log(gamma))/2;
+facsum(%, mu, mu**2);
+divide(%, mu**2);
+divide(%[2], mu);
+divide(%[2], 1);
+
+-(gamma*(x-mu)**2-log(2*pi)+log(gamma))/2;
+facsum(%, gamma, log(gamma));
+divide(%, log(gamma));
+divide(%[2], gamma);
+divide(%[2], 1);
+
