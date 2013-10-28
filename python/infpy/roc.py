@@ -16,7 +16,8 @@ logging.basicConfig(level=logging.INFO)
 
 class RocCalculator(object):
     """
-    Calculates specificities and sensitivities from counts of true and false positives and negatives.
+    Calculates specificities and sensitivities from counts of true and false
+    positives and negatives.
 
     Source: wikipedia - Fawcett (2004)
     """
@@ -655,6 +656,27 @@ def plot_rocpoint(rocpoint, **plotargs):
         markersize=6,
         **plotargs
     )
+
+
+def bisect_rocs(rocpoints, predicate, start=0, end=None):
+    """Return the index into rocpoints for first rocpoint with
+    predicate(rocpoint) is True and start <= index < end. Assumes
+    rocpoints are sorted w.r.t. predicate.
+    """
+    if end is None:
+        end = len(rocpoints)
+    if end <= start:
+        raise ValueError('Start (%d) must be less than end (%d).' % (start, end))
+    new_index = (start + end) / 2
+    if start == new_index:
+        return end  # We narrowed down the range completely
+    else:
+        if predicate(rocpoints[new_index]):
+            # Look in lower half
+            return bisect_rocs(rocpoints, predicate, start, new_index)
+        else:
+            # Look in upper half
+            return bisect_rocs(rocpoints, predicate, new_index, end)
 
 
 def restrict_false_positives(rocpoints, max_fp=50):
