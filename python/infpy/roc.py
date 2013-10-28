@@ -270,7 +270,7 @@ def plot_roc_points(rocs, **plot_kwds):
     return plot(fprs, tprs, **plot_kwds)
 
 
-def plot_rocpoints(rocpoints, **plot_kwds):
+def plot_rocpoints(rocpoints, fillargs=None, **plot_kwds):
     """
     Plots TPR versus FPR for the ROCs in rocpoints.
 
@@ -278,9 +278,11 @@ def plot_rocpoints(rocpoints, **plot_kwds):
     :param plot_kwds: All extra keyword arguments are passed to the pylab.plot call.
     :returns: The result of pylab.plot call.
     """
-    from pylab import plot
+    from pylab import plot, fill_between
     tprs = map(RocCalculator.tpr, rocpoints)
     fprs = map(RocCalculator.fpr, rocpoints)
+    if fillargs is not None:
+        fill_between(fprs, tprs, **fillargs)
     return plot(fprs, tprs, **plot_kwds)
 
 
@@ -753,22 +755,49 @@ if '__main__' == __name__:
     assert 3 == len(points)
 
     # Try a few
-    positive = R.normal(size=500, loc=.6, scale=.4)
-    positive.sort()
+    R.seed(1)
+    positive1 = R.normal(size=500, loc=.6, scale=.4)
+    positive1.sort()
+    positive2 = R.normal(size=500, loc=.8, scale=.8)
+    positive2.sort()
     negative = R.normal(size=700, loc=.2, scale=.4)
     negative.sort()
-    points = list(all_rocs_from_thresholds(positive, negative, True))
-    check_points(points)
-    logging.info(
-        'Got %4d ROC points, AUC=%.3f, AUC50=%.3f',
-        len(points), auc(points), auc50_from_rocpoints(points[::-1]))
-    plot_rocpoints(points, label='a few')
-    restricted_points = list(restrict_false_positives(points[::-1]))
-    plot_rocpoints(restricted_points, label='ROC50')
+    golden_ratio = (1 + math.sqrt(5)) / 2
+    P.figure(figsize=(6, 6))
     plot_random_classifier()
+    colors = ['green', 'blue']
+    hatches = ['/', '\\']
+    for idx, positive in enumerate((positive1, positive2)):
+        color = colors[idx]
+        points = list(all_rocs_from_thresholds(positive, negative, True))
+        check_points(points)
+        method = idx + 1
+        label = 'method %d' % method
+        logging.info(
+            '%s: Got %4d ROC points, AUC=%.3f, AUC50=%.3f',
+            label, 
+            len(points), 
+            auc(points), 
+            auc50_from_rocpoints(points[::-1]))
+        plot_rocpoints(points, label=label, color=color)
+        restricted_points = list(restrict_false_positives(points[::-1]))
+        plot_rocpoints(
+            restricted_points, 
+            label=None,
+            fillargs={
+                'alpha' : 0.3,
+                #'hatch' : hatches[idx],
+                'edgecolor' : (0,0,0,0),
+                'facecolor' : color,
+                #'facecolor' : (0,0,0,0),
+            },
+            color=(0,0,0,0),
+        )
     P.legend(loc='lower right')
+    label_plot()
     P.savefig('output/ROC.eps')
     P.savefig('output/ROC.png')
+    P.savefig('output/ROC.pdf')
     P.close('all')
 
 
