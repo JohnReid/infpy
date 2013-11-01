@@ -2,7 +2,8 @@
 
 ENV=install-test-env
 [ ! -d $ENV ]
-virtualenv $ENV
+# have to use system site packages for numpy to find python-dev package
+virtualenv --system-site-packages $ENV
 . $ENV/bin/activate
 
 PACKAGE=infpy
