@@ -1,0 +1,29 @@
+#!/bin/bash -ex
+
+ENV=install-test-env
+[ ! -d $ENV ]
+virtualenv $ENV
+. $ENV/bin/activate
+
+PACKAGE=infpy
+REPO=infpy
+UNINSTALL="pip uninstall --yes $PACKAGE"
+
+# Doesn't work yet but might soon. See:
+# https://github.com/pypa/pip/pull/1215
+# and
+# http://stackoverflow.com/a/19516714/959926
+# Install from git
+#pip install git+https://github.com/JohnReid/$REPO.git/python
+#python -c "import $PACKAGE"
+#$UNINSTALL
+
+# Install from PyPI
+pip install $PACKAGE
+python -c "import $PACKAGE"
+$UNINSTALL
+
+# Install local version
+python setup.py install
+python -c "import $PACKAGE"
+

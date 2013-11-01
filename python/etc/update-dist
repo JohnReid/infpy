@@ -5,17 +5,19 @@
 # Configuration
 #
 UPLOAD_URL="http://pypi.python.org/pypi?%3Aaction=pkg_edit&name=infpy"
-HOST=xenakis
-DIR=htdocs/infpy
+HOST=zemlinsky
+DIR=www/infpy
 
 
 #
 # Check everything is checked in
 #
-if [ "$(svn st)" != "" ]
+if ! git st | grep "working directory clean"
 then
-  svn st
+  git st
+  echo "*************************************************************"
   echo "You need to check in everything before updating distribution."
+  echo "*************************************************************"
   exit -1
 fi
 
