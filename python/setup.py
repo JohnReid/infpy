@@ -30,7 +30,7 @@ setup(
     url                    = "http://sysbio.mrc-bsu.cam.ac.uk/johns/infpy/docs/build/html/",   # project home page, if any
     packages               = find_packages(),
     package_data           = { 'infpy' : ['README', 'VERSION', 'LICENSE'] },
-    install_requires       = ['distribute', 'scipy'],
+    install_requires       = ['cookbook', 'distribute', 'scipy'],
     long_description       = read('infpy', 'README'),
     classifiers            = [
         "Development Status :: 5 - Production/Stable",
