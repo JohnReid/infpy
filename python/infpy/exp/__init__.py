@@ -1,17 +1,85 @@
 #
-# Copyright John Reid 2007
+# Copyright John Reid 2007, 2014
 #
 
-from numpy import array, asarray, asmatrix, dot, zeros, ones, empty, diag
-from numpy import log, exp, outer, float64, trace, sqrt, sum, identity, linspace
+
+r"""
+
+A package that abstracts `exponential family probability distributions
+<http://en.wikipedia.org/wiki/Exponential_family>`_. A probability distribution
+is said to be in the exponential family if it can be represented in a specific
+form:
+
+.. math::
+
+    p(x|\theta) = g(\theta)e^{\eta(\theta).T(x) - A(\theta) + h(T(x))}
+
+Where:
+    - :math:`x` is the random variable.
+    - :math:`T(x)` is the random variable's sufficient statistics.
+    - :math:`\theta` is the canonical parameter of the distribution,
+      e.g. (mean, covariance) for a gaussian.
+    - :math:`\eta(\theta)` is the natural parameter of the distribution.
+    - :math:`A(\theta)` is the normalization factor (log partition function).
+    - :math:`h(T)` is commonly 0.0 and provides a measure for :math:`x`.
+
+The (possibly vector-valued) functions :math:`T(x)` and :math:`\eta(\theta)`
+define a correspondence between the normal and canonical forms of the
+distribution.
+
+For example, if you wanted to work with a univariate Gaussian in natural form,
+you could use the :class:`.GaussianExpFamily` class. Here we calculate the
+log probability of drawing 0, .5 and 1 from a Gaussian distribution with
+mean 0 and precision (inverse variance) 1.
+
+.. doctest::
+
+    >>> import infpy.exp as exp
+    >>> import numpy as npy
+    >>> npy.set_printoptions(precision=2)
+    >>> family = exp.GaussianExpFamily()
+    >>> mu = 0     # Mean
+    >>> gamma = 1  # Precision (inverse variance)
+    >>> theta = (mu, gamma)          # Natural parameters
+    >>> eta = family.eta(theta)      # Canonical parameters
+    >>> x = npy.array([0., .5, 1.])  # 3 data in natural form
+    >>> T = family.T(x)              # Data in canonical form
+    >>> T
+    array([[ 0.  ,  0.  ],
+           [ 0.5 ,  0.25],
+           [ 1.  ,  1.  ]])
+    >>> family.log_p_T(T, eta)       # Log probability using canonical form
+    array([-0.92, -1.04, -1.42])
+    >>> family.log_p_x(x, theta)     # Log probability using natural form
+    array([-0.92, -1.04, -1.42])
+
+We can also sample from exponential family distributions.
+
+.. doctest::
+
+    >>> npy.random.seed(1)
+    >>> Tsampled = family.sample(eta, 4)  # Sample 4 sufficient statistics
+    >>> Tsampled
+    array([[ 1.62,  2.64],
+           [-0.61,  0.37],
+           [-0.53,  0.28],
+           [-1.07,  1.15]])
+    >>> map(family.x, Tsampled)           # Convert to natural form
+    [1.6243453636632417, -0.61175641365007538, -0.5281717522634557, -1.0729686221561705]
+
+
+"""
+
+
+from numpy import array, asarray, dot, zeros, empty, diag
+from numpy import log, exp, outer, float64, trace, sqrt, sum, linspace
 from numpy.dual import solve
 from numpy.linalg import det, inv, cholesky
 from math import pi
 from scipy.stats import norm
-from scipy.special import gamma, gammaln, digamma, polygamma
+from scipy.special import gammaln, digamma, polygamma
 
 _log_2_pi = log(2 * pi)
-
 
 
 def log_multivariate_gamma(p, a):
@@ -56,25 +124,29 @@ class Variable(object):
 
 class ExponentialFamily(object):
     """
-    An U{exponential family<http://en.wikipedia.org/wiki/Exponential_family>} of distributions over x.
+
+    An U{exponential family<http://en.wikipedia.org/wiki/Exponential_family>}
+    of distributions over x.
 
     M{log p(x|theta) = eta(theta).T(x) - A(theta) + h(T(x))}
 
-    Where
-            - x : the random variable
-            - T(x) : the random variable's sufficient statistics
-            - theta : the canonical parameter of the distribution, e.g. (mean, covariance) for a gaussian
-            - eta(theta) : the natural parameter of the distribution
-            - A(theta) : the normalization factor (log partition function) (can be a vector)
-            - h(T) : commonly 0.0 and provides a measure for x
+    Where:
+        - :math:`x` : the random variable
+        - T(x) : the random variable's sufficient statistics
+        - theta : the canonical parameter of the distribution, e.g. (mean,
+        covariance) for a gaussian
+        - eta(theta) : the natural parameter of the distribution
+        - A(theta) : the normalization factor (log partition function) (can
+        be a vector)
+        - h(T) : commonly 0.0 and provides a measure for x
 
-    T and eta should be numpy arrays of shape (self.dimension,).
-    Base classes that implement a specific exponential family must define T, eta, A and h such that
-    the above equation holds.
-    They should also define some of the methods/attributes in the following sections.
+    T and eta should be numpy arrays of shape (self.dimension,).  Base classes
+    that implement a specific exponential family must define T, eta, A and h
+    such that the above equation holds.  They should also define some of the
+    methods/attributes in the following sections.
 
     *Conversion* methods include:
-    
+
     - theta(eta) : converts from natural parameters to canonical parameters
     - x(T) : converts from canonical parameters to natural parameters if it differs from 0.0
     - dimension : returns the length of eta and T
@@ -86,12 +158,12 @@ class ExponentialFamily(object):
     - sample_eta(eta, size=1) : returns a sample from the distribution parameterised by eta
 
     The following *special* methods are optional:
-    
+
     - exp_T(eta) : returns M{d(A)/d(eta)}, the derivative of the normalization factor with respect to
         the natural parameter, evaluated at eta. This is equivalent to the expectation of T.
 
     *Testing* methods include:
-    
+
     - _p_truth(x, theta) : returns M{p(x|theta)} calculated by a different method
         (e.g. scipy.stats) for testing
     - _entropy_truth(theta) I{optional} : returns entropy of M{p(x|theta)} calculated by a different method
@@ -116,7 +188,7 @@ class ExponentialFamily(object):
         The length of A(theta). Normally one when a scalar is returned, can be returned as a vector of the
         given dimension. This can be useful in conjugate analysis.
         """
-        
+
         self.vectorisable = vectorisable
         """
         Can we pass more than one T or eta to the methods of this family?
@@ -157,11 +229,11 @@ class ExponentialFamily(object):
     def A(self, eta):
         """
         @return: The normalisation factor (log partition) for the exponential family (as a scalar).
-        
+
         See A_vec() for the vectorised version.
         """
         return self.A_vec(eta).sum(axis=-1)
-        
+
     def p_x(self, x, theta):
         """
         @return: M{p(x|theta)}.
@@ -211,23 +283,23 @@ class ExponentialFamily(object):
         @return: An empty array of the correct size for T or eta.
         """
         return empty((self.dimension,), dtype=float64)
-    
+
     def LL_fns(self, tau, nu):
         """
-        @return: ll, ll_prime, ll_hessian : The log likelihood function and its derivative and hessian for the given 
+        @return: ll, ll_prime, ll_hessian : The log likelihood function and its derivative and hessian for the given
         tau and nu prior.
         """
         def ll(eta):
             return dot(eta, tau) - nu * self.A(eta)
-        
+
         def ll_prime(eta):
             return tau - nu * self.exp_T(eta)
-            
+
         def ll_hess(eta):
             return - nu * self.cov_T(eta)
-        
+
         return ll, ll_prime, ll_hess
-    
+
 
 
 
@@ -239,13 +311,14 @@ class ExponentialFamily(object):
 
 
 class GaussianExpFamily(ExponentialFamily):
-    """
+    r"""
     The univariate gaussian distribution in exponential family form.
 
-     - theta = (mu,gamma) where mu is the mean and gamma is the precision
-     - T = (x, x*x)
-     - eta = (mu*gamma, -gamma/2)
-     - A = -.5 * (log(gamma) - gamma * mu * mu - log(2 * pi))
+    - :math:`\theta = (\mu, \gamma)` where :math:`\mu` is the mean and
+      :math:`\gamma` is the precision
+    - :math:`T = (x, x^2)`
+    - :math:`\eta = (\mu\gamma, -\frac{\gamma}{2})`
+    - :math:`A = -\frac{1}{2}(\log\frac{\gamma}{2\pi} - \gamma \mu^2)`
 
     """
 
@@ -306,7 +379,10 @@ class GaussianExpFamily(ExponentialFamily):
         return T[0]
 
     def eta(self, theta):
-        "@return: eta(theta), the natural parameter, eta, that corresponds to the canonical parameter, theta"
+        r""":math:`\eta(\theta)`, the natural parameter :math:`\eta`, that corresponds to
+        the canonical parameter, :math:`\theta`.
+        """
+        theta = asarray(theta, dtype=float)
         return array([theta[0] * theta[1], -theta[1]/2 ])
 
     def theta(self, eta):
@@ -899,7 +975,7 @@ class WishartExpFamily(ExponentialFamily):
         is typically regarded as the precision
     - eta(theta) = [n-p-1, -inv(V).flatten()] / 2
     - A(theta) = (n.p.log 2 + n.log det V) / 2 + log gamma_p (n/2)
-    
+
     """
 
     _typical_xs = [

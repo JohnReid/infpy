@@ -1,3 +1,4 @@
+virtualenv
 install-test-env
 build
 dist

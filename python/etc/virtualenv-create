@@ -1,0 +1,10 @@
+#!/bin/bash -ex
+
+# create and activate the virtualenv
+virtualenv --system-site-packages virtualenv
+. virtualenv/bin/activate
+
+# install dependencies
+UPGRADE="pip install --upgrade"
+$UPGRADE ipython[zmq]
+$UPGRADE pymc sphinx

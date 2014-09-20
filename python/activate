@@ -1,0 +1,16 @@
+# Source functions to alter environment
+#. $HOME/.dev_env
+
+# Determine directory
+SELF=$(readlink -f $BASH_SOURCE)
+export PROJECTDIR=$(dirname $SELF)
+export DATADIR=$PROJECTDIR/data
+
+# Update path
+eval $(update-env \
+    --path-pre $PROJECTDIR/bin \
+)
+
+# Activate virtualenv
+. $PROJECTDIR/virtualenv/bin/activate
+
