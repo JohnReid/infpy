@@ -127,22 +127,22 @@ class Variable(object):
 
 class ExponentialFamily(object):
 
-    """
+    r"""
 
-    An U{exponential family<http://en.wikipedia.org/wiki/Exponential_family>}
+    An `exponential family<http://en.wikipedia.org/wiki/Exponential_family>`_
     of distributions over x.
 
-    :math:`log p(x|theta) = eta(theta).T(x) - A(theta) + h(T(x))`
+    :math:`\log p(x|\theta) = \eta(\theta).T(x) - A(\theta) + h(T(x))`
 
     Where:
         - :math:`x` : the random variable
-        - T(x) : the random variable's sufficient statistics
-        - theta : the canonical parameter of the distribution, e.g. (mean,
-        covariance) for a gaussian
-        - eta(theta) : the natural parameter of the distribution
-        - A(theta) : the normalization factor (log partition function) (can
-        be a vector)
-        - h(T) : commonly 0.0 and provides a measure for x
+        - :math:`T(x)` : the random variable's sufficient statistics
+        - :math:`\theta` : the canonical parameter of the distribution,
+          e.g. (mean, covariance) for a gaussian
+        - :math:`\eta(\theta)` : the natural parameter of the distribution
+        - :math:`A(\theta)` : the normalization factor (log partition function)
+          (can be a vector)
+        - :math:`h(T)` : commonly 0.0 and provides a measure for :math:`x`
 
     T and eta should be numpy arrays of shape (self.dimension,).  Base classes
     that implement a specific exponential family must define T, eta, A and h
@@ -172,10 +172,11 @@ class ExponentialFamily(object):
 
     *Testing* methods include:
 
-    - _p_truth(x, theta) : returns :math:`p(x|theta)` calculated by a
+    - _p_truth(x, theta) : returns :math:`p(x|\theta)` calculated by a
       different method (e.g. scipy.stats) for testing
-    - _entropy_truth(theta) I{optional} : returns entropy of :math:`p(x|theta)`
-      calculated by a different method (e.g. scipy.stats) for testing
+    - _entropy_truth(theta) I{optional} : returns entropy of
+      :math:`p(x|\theta)` calculated by a different method
+      (e.g. scipy.stats) for testing
     - _typical_xs : a sequence of typical x values for the family
     - _typical_thetas : a sequence of typical theta values for the family
     """
@@ -228,7 +229,7 @@ class ExponentialFamily(object):
         """
         @param x: the random variable in canonical form
         @param theta: the parameter in canonical form
-        :math:`log p(x|theta)`
+        :math:`log p(x|\theta)`
         """
         return self.log_p_T(self.T(x), self.eta(theta))
 
@@ -251,7 +252,7 @@ class ExponentialFamily(object):
 
     def p_x(self, x, theta):
         """
-        :math:`p(x|theta)`.
+        :math:`p(x|\theta)`.
         """
         return exp(self.log_p_x(x, theta))
 
@@ -399,7 +400,7 @@ class GaussianExpFamily(ExponentialFamily):
         return array([theta[0] * theta[1], -theta[1] / 2])
 
     def theta(self, eta):
-        """theta(eta), the canonical parameter, theta, that
+        """The canonical parameter, theta, that
         corresponds to the natural parameter, eta"""
         assert self._check_shape(eta)
         gamma = -2 * eta[1]
@@ -421,7 +422,7 @@ class GaussianExpFamily(ExponentialFamily):
 
     def _p_truth(self, x, theta):
         """
-        :math:`log p(x|theta)` calculated by an independent method.
+        :math:`log p(x|\theta)` calculated by an independent method.
         (Primarily for testing purposes)
         """
         (mu, gamma) = theta
@@ -429,7 +430,7 @@ class GaussianExpFamily(ExponentialFamily):
 
     def _entropy_truth(self, theta):
         """
-        entropy of :math:`p(x|theta)` calculated by an independent
+        entropy of :math:`p(x|\theta)` calculated by an independent
         method. (Primarily for testing purposes)
         """
         (_mu, gamma) = theta
@@ -439,19 +440,19 @@ class GaussianExpFamily(ExponentialFamily):
 class DirichletExpFamily(ExponentialFamily):
 
     """
-    The dirichlet distribution in exponential family form.
+    The Dirichlet distribution in exponential family form.
 
-            - x = p1, ..., pk
-            - :math:`T(x) = log(x)`
-            - :math:`eta(theta) = theta-1`
+        - k: the number of outcomes
+        - :math:`x = p_1, \dots, p_k`
+        - :math:`T(x) = \log x`
+        - :math:`\eta(\theta) = \theta-1`
 
     Does not handle the case where x = 0.
     """
 
     def __init__(self, k=2):
         """
-        Initialise the dirichlet exponential family.
-        @arg k: the number of outcomes
+        Initialise the Dirichlet exponential family.
         """
         super(type(self), self).__init__(k, vectorisable=True)
 
@@ -500,12 +501,12 @@ class DirichletExpFamily(ExponentialFamily):
         return exp(T)
 
     def eta(self, theta):
-        """eta(theta), the natural parameter, eta, that corresponds to
+        """The natural parameter, eta, that corresponds to
         the canonical parameter, theta"""
         return theta - 1.
 
     def theta(self, eta):
-        """theta(eta), the canonical parameter, theta, that corresponds
+        """The canonical parameter, theta, that corresponds
         to the natural parameter, eta"""
         assert self._check_shape(eta)
         return eta + 1.
@@ -527,7 +528,7 @@ class DirichletExpFamily(ExponentialFamily):
 
     def _p_truth(self, x, theta):
         """
-        :math:`log p(x|theta)` calculated by an independent method.
+        :math:`log p(x|\theta)` calculated by an independent method.
         (Primarily for testing purposes)
         """
         assert len(x) == len(theta)
@@ -603,13 +604,13 @@ class GammaExpFamily(ExponentialFamily):
         return T[0]
 
     def eta(self, theta):
-        """eta(theta), the natural parameter, eta, that corresponds to
+        """The natural parameter, eta, that corresponds to
         the canonical parameter, theta"""
         (a, b) = theta
         return array((-b, a - 1.))
 
     def theta(self, eta):
-        """theta(eta), the canonical parameter, theta, that corresponds
+        """The canonical parameter, theta, that corresponds
         to the natural parameter, eta"""
         assert self._check_shape(eta)
         return array((eta[1] + 1, -eta[0]))
@@ -631,7 +632,7 @@ class GammaExpFamily(ExponentialFamily):
 
     def _p_truth(self, x, theta):
         """
-        :math:`log p(x|theta)` calculated by an independent method.
+        :math:`log p(x|\theta)` calculated by an independent method.
         (Primarily for testing purposes)
         """
         from scipy.stats import gamma
@@ -644,7 +645,7 @@ class GammaExpFamily(ExponentialFamily):
 
     def _entropy_truth(self, theta):
         """
-        entropy of :math:`p(x|theta)` calculated by an independent
+        entropy of :math:`p(x|\theta)` calculated by an independent
         method. (Primarily for testing purposes)
         """
         (a, b) = theta
@@ -703,13 +704,13 @@ class PoissonExpFamily(ExponentialFamily):
         return T[0]
 
     def eta(self, theta):
-        """eta(theta), the natural parameter, eta, that corresponds
+        """The natural parameter, eta, that corresponds
         to the canonical parameter, theta"""
         _lambda = theta
         return log(asarray([_lambda]))
 
     def theta(self, eta):
-        """theta(eta), the canonical parameter, theta, that
+        """The canonical parameter, theta, that
         corresponds to the natural parameter, eta"""
         assert self._check_shape(eta)
         return exp(eta[0])
@@ -760,7 +761,7 @@ class PoissonExpFamily(ExponentialFamily):
 
     def _p_truth(self, x, theta):
         """
-        :math:`log p(x|theta)` calculated by an independent method.
+        :math:`log p(x|\theta)` calculated by an independent method.
         (Primarily for testing purposes)
         """
         _lambda = theta
@@ -823,12 +824,13 @@ class DiscreteExpFamily(ExponentialFamily):
             raise RuntimeError("Could not find positive value in u")
 
     def eta(self, theta):
-        """eta(theta), the natural parameter, eta, that corresponds
+        """The natural parameter, eta, that corresponds
         to the canonical parameter, theta"""
         return log(theta)
 
     def theta(self, eta):
-        """theta(eta), the canonical parameter, theta, that
+        """The canonical parameter, theta, that
+        theta(eta), t
         corresponds to the natural parameter, eta"""
         assert self._check_shape(eta)
         return exp(eta)
@@ -854,14 +856,14 @@ class DiscreteExpFamily(ExponentialFamily):
 
     def _p_truth(self, x, theta):
         """
-        :math:`log p(x|theta)` calculated by an independent method.
+        :math:`log p(x|\theta)` calculated by an independent method.
         (Primarily for testing purposes)
         """
         return theta[x]
 
     def _entropy_truth(self, theta):
         """
-        entropy of :math:`p(x|theta)` calculated by an independent
+        entropy of :math:`p(x|\theta)` calculated by an independent
         method. (Primarily for testing purposes)
         """
         return - dot(theta, log(theta))
@@ -877,11 +879,11 @@ class MvnExpFamily(ExponentialFamily):
 
     Exponential family parameterisation:
 
-    - :math:`T(x) = (x, x.x)`
-    - :math:`theta = (mu,W)` where :math:`\mu` is the mean and :math:`W`
+    - :math:`T(x) = (x, x x^t)`
+    - :math:`\theta = (mu,W)` where :math:`\mu` is the mean and :math:`W`
       is the precision
-    - :math:`eta(theta) = (W.mu, W/2)`
-    - :math:`A(theta) = \frac{1}{2} [\mu W \mu - \log|W| + k \log(2\pi)]`
+    - :math:`\eta(\theta) = (W \mu, \frac{W}{2})`
+    - :math:`A(\theta) = \frac{1}{2} [\mu W \mu - \log|W| + k \log(2\pi)]`
     """
 
     def __init__(self, k=2):
@@ -937,7 +939,7 @@ class MvnExpFamily(ExponentialFamily):
         return T[:self.k]
 
     def eta(self, theta):
-        """eta(theta), the natural parameter, eta, that corresponds to
+        """The natural parameter, eta, that corresponds to
         the canonical parameter, theta."""
         (mu, W) = self._mu_W_from_theta(theta)
         eta = self._empty()
@@ -946,7 +948,7 @@ class MvnExpFamily(ExponentialFamily):
         return eta
 
     def theta(self, eta):
-        """theta(eta), the canonical parameter, theta, that
+        """The canonical parameter, theta, that
         corresponds to the natural parameter, eta."""
         assert self._check_shape(eta)
         W = 2. * eta[self.k:].reshape((self.k, self.k))
@@ -984,7 +986,7 @@ class MvnExpFamily(ExponentialFamily):
 
     def _p_truth(self, x, theta):
         """
-        :math:`log p(x|theta)` calculated by an independent method.
+        :math:`log p(x|\theta)` calculated by an independent method.
         (Primarily for testing purposes)
         """
         (mu, W) = self._mu_W_from_theta(theta)
@@ -997,19 +999,29 @@ class MvnExpFamily(ExponentialFamily):
 class WishartExpFamily(ExponentialFamily):
 
     r"""
-    The
-    `Wishart distribution
+    The `Wishart distribution
     <http://en.wikipedia.org/wiki/Wishart_distribution>`_ in p dimensions
     in exponential family form.
 
+    .. math::
+
+        X \sim W_p(V, n)
+
+    where:
+
+        - :math:`n > p - 1` : degrees of freedom
+        - :math:`V` : scale matrix (positive definite)
+
     Exponential family parameterisation:
 
-    - :math:`T(W) = [\log(det(W)), W.flatten]`
-    - :math:`theta = (n, V)` where :math:`n` is the degrees of freedom and
-      :math:`V`, the scale matrix, is typically regarded as the precision
-    - :math:`\eta(\theta) = \frac{1}{2}[n-p-1, -V^{-1}.flatten]`
-    - :math:`A(\theta) = \frac{1}{2}(n p \log 2 + n \log det V)
-      + \log gamma_p (n/2)`
+    - :math:`T(W) = [\log |W|, W]` (flattened)
+    - :math:`\theta = (n, V)`
+    - :math:`\eta(\theta) = \frac{1}{2}[n-p-1, -V^{-1}]` (flattened)
+    - :math:`A(\theta) = \frac{1}{2}(n p \log 2 + n \log |V|)
+      + \log \Gamma_p (\frac{n}{2})`
+
+    where :math:`\Gamma_p` is the `multivariate gamma distribution
+    <http://en.wikipedia.org/wiki/Multivariate_gamma_function>`_.
 
     """
 
@@ -1066,7 +1078,7 @@ class WishartExpFamily(ExponentialFamily):
         return asarray(T[1:].reshape((self.p, self.p)))
 
     def eta(self, theta):
-        """eta(theta), the natural parameter, eta, that corresponds
+        """The natural parameter, eta, that corresponds
         to the canonical parameter, theta."""
         (n, V) = self._n_V_from_theta(theta)
         eta = self._empty()
@@ -1076,7 +1088,7 @@ class WishartExpFamily(ExponentialFamily):
         return eta
 
     def theta(self, eta):
-        """theta(eta), the canonical parameter, theta, that
+        """The canonical parameter, theta, that
         corresponds to the natural parameter, eta."""
         assert self._check_shape(eta)
         n = 2. * eta[0] + 1. + self.p
@@ -1134,7 +1146,7 @@ class WishartExpFamily(ExponentialFamily):
 
     def _p_truth(self, x, theta):
         r"""
-        :math:`log p(x|theta)` calculated by an independent method.
+        :math:`log p(x|\theta)` calculated by an independent method.
         (Primarily for testing purposes)
         """
         n, V = self._n_V_from_theta(theta)
@@ -1249,7 +1261,7 @@ class NormalGammaExpFamily(ExponentialFamily):
         return array((mu, gamma))
 
     def eta(self, theta):
-        """eta(theta), the natural parameter, eta, that
+        """The natural parameter, eta, that
         corresponds to the canonical parameter, theta"""
         alpha, beta, mu_0, _lambda = theta
         eta = self._empty()
@@ -1260,7 +1272,7 @@ class NormalGammaExpFamily(ExponentialFamily):
         return eta
 
     def theta(self, eta):
-        """theta(eta), the canonical parameter, theta, that
+        """The canonical parameter, theta, that
         corresponds to the natural parameter, eta"""
         assert self._check_shape(eta)
         alpha = (eta[0] + 1.) / 2.
@@ -1301,7 +1313,7 @@ class NormalGammaExpFamily(ExponentialFamily):
 
     def _p_truth(self, x, theta):
         """
-        :math:`log p(x|theta)` calculated by an independent method.
+        :math:`log p(x|\theta)` calculated by an independent method.
         (Primarily for testing purposes)
         """
         alpha, beta, mu_0, _lambda = theta
@@ -1316,8 +1328,8 @@ class NormalWishartExpFamily(ExponentialFamily):
     A Normal-Wishart distribution in p dimensions.
     This is a conjugate prior for the multivariate normal distribution.
 
-     - :math:`W \sim Wishart(\nu,S)`
-     - :math:`\mu|W \sim Normal(\mu_0, inv(W)/\kappa_0)`
+     - :math:`W \sim \textrm{Wishart}(\nu,S)`
+     - :math:`\mu|W \sim \mathcal{N}(\mu_0, \frac{W^{-1}}{\kappa_0})`
 
     where the parameters are:
 
@@ -1329,12 +1341,19 @@ class NormalWishartExpFamily(ExponentialFamily):
     The exponential family parameterisation:
 
      - :math:`x = (\mu, W)`
-     - :math:`T(x) = [(log|W|-p.log(2.pi))/2, -\mu'.W.\mu/2, self.mvn.eta(x)]`
+     - :math:`T(x) = [\frac{1}{2}(\log|W|-p\log(2\pi)),
+       -\frac{1}{2}\mu' W \mu, \eta_\textrm{MVN}(x)]`
      - :math:`\theta = (\nu, S, \kappa_0, \mu_0)`
      - :math:`\eta(\theta) = [\kappa_0, \nu-p, -\kappa_0.\mu_0,
-       \kappa_0.\mu_0.\mu_0'-inv(S)]`
-     - :math:`A(\theta) = p/2[(p+1)\log 2 - (\nu-p-1)\log(\pi) - \log \kappa_0]
-       + \nu/2 \log|S| + \log \Gamma_p(\nu/2)`
+       \kappa_0 \mu_0 \mu_0'-S^{-1}]`
+     - :math:`A(\theta) = \frac{p}{2}[(p+1)\log 2
+       - (\nu-p-1)\log(\pi) - \log \kappa_0]
+       + \frac{\nu}{2} \log|S| + \log \Gamma_p(\frac{\nu}{2})`
+
+    where :math:`\eta_\textrm{MVN}(x)` is the :math:`\eta()` function from the
+    MVN exponential family and :math:`\Gamma_p` is the `multivariate gamma
+    distribution <http://en.wikipedia.org/wiki/Multivariate_gamma_function>`_.
+
     """
 
     _typical_xs = [
@@ -1376,7 +1395,7 @@ class NormalWishartExpFamily(ExponentialFamily):
         "The dimension of mu"
 
     def T(self, x):
-        "T(x), the sufficient statistics of x"
+        "The sufficient statistics of x"
         mu, W = x
         T = self._empty()
         T[2:] = self.mvn.eta(x)
@@ -1386,8 +1405,8 @@ class NormalWishartExpFamily(ExponentialFamily):
 
     def exp_T(self, eta):
         """
-        @arg eta: The natural parameters.
-        The expectation of T, the sufficient statistics, given eta.
+        The expectation of T, the sufficient statistics, given the natural
+        parameters, eta.
         """
         nu, S, _kappa_0, mu_0 = self.theta(eta)
         T = self._empty()
@@ -1399,13 +1418,13 @@ class NormalWishartExpFamily(ExponentialFamily):
         return T
 
     def x(self, T):
-        "x(T), the x that has the sufficient statistics, T"
+        "The x that has the sufficient statistics, T"
         assert self._check_shape(
             T), 'T is not the correct shape: %s' % str(T.shape)
         return self.mvn.theta(T[2:])
 
     def eta(self, theta):
-        """eta(theta), the natural parameter, eta, that
+        """The natural parameter, eta, that
         corresponds to the canonical parameter, theta"""
         nu, S, kappa_0, mu_0 = self._unpack_theta(theta)
         eta = self._empty()
@@ -1417,7 +1436,7 @@ class NormalWishartExpFamily(ExponentialFamily):
         return eta
 
     def theta(self, eta):
-        """theta(eta), the canonical parameter, theta, that
+        """The canonical parameter, theta, that
         corresponds to the natural parameter, eta"""
         assert self._check_shape(eta)
         nu = eta[0] + self.p
@@ -1439,9 +1458,7 @@ class NormalWishartExpFamily(ExponentialFamily):
 
     def sample(self, eta, size=1):
         """
-        @param eta: the natural parameters
-        @param size: the size of the sample
-        A sample of sufficient statistics
+        A sample of sufficient statistics given the natural parameters, eta.
         """
         # from IPython.Debugger import Pdb; Pdb().set_trace()
         samples = empty((size, self.dimension))
@@ -1471,7 +1488,7 @@ class NormalWishartExpFamily(ExponentialFamily):
 
     def _p_truth(self, x, theta):
         """
-        :math:`log p(x|theta)` calculated by an independent method.
+        :math:`log p(x|\theta)` calculated by an independent method.
         (Primarily for testing purposes)
         """
         nu, S, kappa_0, mu_0 = self._unpack_theta(theta)
