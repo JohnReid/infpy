@@ -89,7 +89,7 @@ class CRP(object):
         p[T] = self.alpha * tablelikelihoodfn(n, -1)
         # Choose a table to sit at
         t = npy.random.choice(range(T + 1), p=p/p.sum())
-        _logger.debug('sampletable(): choice = %d; weights = %s', t, p)
+        # _logger.debug('sampletable(): choice = %d; weights = %s', t, p)
         # If we chose a new table, we must create it unless we can
         # reuse an old empty one
         if t == T and emptytable is not None:
@@ -136,8 +136,8 @@ class DPExpFam(object):
         else:
             psi = self.psi[t]
         logp = self.F.log_conjugate_predictive(self.x[n], psi)
-        _logger.debug('n=%d; t=%d, p=%.2e; T=%s, tau=%s',
-                      n, t, npy.exp(logp), self.x[n], psi)
+        # _logger.debug('n=%d; t=%d, p=%.2e; T=%s, tau=%s',
+        #               n, t, npy.exp(logp), self.x[n], psi)
         return logp
 
     @property
@@ -326,6 +326,12 @@ class ContextClusterMixture(object):
             tj = context.crp.z[t0]
             context.sit(n, tj)
 
+    def sample(self):
+        "Make one datum stand up and sit down."
+        n = npy.random.choice(self.N)
+        self.stand(n)
+        self.sampleandsit(n)
+
     class Context(DPExpFam):
 
         """Holds the context specific data and parameters."""
@@ -470,9 +476,11 @@ if '__main__' == __name__:
     reload(infpy.crp)
     ccm = infpy.crp.ContextClusterMixture([F] * len(x), T, [tau] * len(x),
                                           alpha, beta)
-
+    K = []
     for i in xrange(1000):
-        mixture.sample()
-        K.append(len(npy.unique(mixture.crp.z)))
+        ccm.sample()
+        K.append(npy.array(ccm.G0.z))
+    K = npy.asarray(K)
+
     # import pandas as pd
     # tcga = pd.read_csv("../data/TCGA.csv.gz", compression="gzip")
