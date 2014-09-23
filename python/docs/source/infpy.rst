@@ -62,6 +62,7 @@ Subpackages
 
 .. toctree::
 
+    infpy.crp
     infpy.dbn
     infpy.decision
     infpy.dp

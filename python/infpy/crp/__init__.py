@@ -31,6 +31,15 @@ class CRP(object):
         "The number of data."
         return len(self.z)
 
+    @property
+    def isconsistent(self):
+        "Is this CRP self consistent?"
+        m = npy.zeros(len(self.m))
+        for zn in self.z:
+            if -1 != zn:
+                m[zn] += 1
+        return (m == self.m).all()
+
     def __repr__(self):
         "String representation."
         return "CRP with {} tables for {} data".format(self.T, self.N)
@@ -39,7 +48,7 @@ class CRP(object):
         "Is the n'th datum sitting down."
         return -1 != self.z[n]
 
-    def standup(self, n):
+    def stand(self, n):
         "Stand the n'th datum up from the table it is sitting at."
         t = self.z[n]
         if -1 == t:
@@ -48,7 +57,7 @@ class CRP(object):
         self.z[n] = -1
         return t
 
-    def sitdown(self, n, t):
+    def sit(self, n, t):
         "Sit the n'th datum down at the t'th table."
         # Extend table assignments list if necessary
         if len(self.z) <= n:
@@ -90,13 +99,13 @@ class CRP(object):
     def sampleandsit(self, n, tablelikelihoodfn):
         "Sample a table for the n'th datum and sit at it."
         t = self.sampletable(n, tablelikelihoodfn)
-        self.sitdown(n, t)
+        self.sit(n, t)
         return t
 
     def flip(self, n, tablelikelihoodfn):
         "Change the status of datum n (sitting or standing)."
         if self.issitting(n):
-            self.standup(n)
+            self.stand(n)
         else:
             self.sampleandsit(n, tablelikelihoodfn)
 
@@ -132,17 +141,33 @@ class DPExpFam(object):
         return logp
 
     @property
+    def isconsistent(self):
+        "Is this DPExpFam self consistent?"
+        if not super(DPExpFam, self).isconsistent():
+            return False
+        psi = [self.tau.copy() for t in xrange(len(self.psi))]
+        for zn in self.z:
+            if -1 != zn:
+                psi[zn] = self.F.add_observations_to_prior(self.x[n],
+                                                           self.psi[zn],
+                                                           n=1)
+        for psi1, psi2 in zip(psi, self.psi):
+            if not (psi1 == psi2).all():
+                return False
+        return True
+
+    @property
     def N(self):
         "Number of data."
         return len(self.x)
 
-    def standup(self, n, t):
+    def stand(self, n, t):
         "Stand the n'th observation up from the t'th table."
         self.psi[t] = self.F.add_observations_to_prior(-self.x[n],
                                                        self.psi[t],
                                                        n=-1)
 
-    def sitdown(self, n, t):
+    def sit(self, n, t):
         "Sit the n'th observation down at the t'th table."
         if t >= len(self.psi):
             assert t == len(self.psi)  # Can only have added one table
@@ -199,13 +224,13 @@ class DPMixture(DPExpFam):
     def sample(self):
         "Make one datum stand up and sit down."
         n = npy.random.choice(self.N)
-        t = self.crp.standup(n)
-        self.standup(n, t)
+        t = self.crp.stand(n)
+        self.stand(n, t)
         self.sampleandsit(n)
 
     def sampleandsit(self, n):
         t = self.crp.sampleandsit(n, self.tablelikelihood)
-        self.sitdown(n, t)
+        self.sit(n, t)
         return t
 
 
@@ -265,6 +290,42 @@ class ContextClusterMixture(object):
         "The number of contexts."
         return len(self.contexts)
 
+    @property
+    def isconsistent(self):
+        "Is this mixture self consistent?"
+        if not self.G0.isconsistent:
+            return False
+        for context in self.contexts:
+            if not context.crp.isconsistent:
+                return False
+        return True
+
+    def stand(self, n):
+        """Stand the n'th datum up from the table it is at."""
+        t0 = self.G0.stand(n)
+        # Did standing up empty the table?
+        if 0 == self.G0.m[t0]:
+            # Yes, so we need to stand up the draw from the context level
+            for context in self.contexts:
+                context.crp.stand(t0)
+
+    def sampleandsit(self, n):
+        """Sample a table for the n'th datum and sit at it."""
+        likelihoods = self.Likelihoods(self.contexts, n)
+        t0 = self.G0.sampleandsit(n, likelihoods.tablelikelihood)
+        # Did we sit at a new table in G0?
+        if 1 == self.G0.m[t0]:
+            # Yes so choose a table in each context level DP
+            for j, context in enumerate(self.contexts):
+                context.crp.sampleandsit(
+                    t0,  # The table in G0 indexes the draw from
+                         # the context level
+                    likelihoods.contexttablelikelihoodfn(j))
+        # Update psi at context level
+        for context in self.contexts:
+            tj = context.crp.z[t0]
+            context.sit(n, tj)
+
     class Context(DPExpFam):
 
         """Holds the context specific data and parameters."""
@@ -298,7 +359,6 @@ class ContextClusterMixture(object):
         def __init__(self, contexts, n):
             self.contexts = contexts
             self.n = n
-            print 'Calculating likelihoods'
             self.likelihoods = map(lambda context: context.likelihoods(n),
                                    contexts)
 
@@ -312,16 +372,14 @@ class ContextClusterMixture(object):
                 # integral over the context's tables
                 contextlikelihoods = (context.newtablelikelihood(likelihoods)
                                       for context, likelihoods
-                                      in zip(self.contexts, self.likelihoods)
-                                      )
+                                      in zip(self.contexts, self.likelihoods))
             else:
                 # No - calculate the likelihood for each context by
                 # picking out the context's table that the table in G0
                 # is associated with
                 contextlikelihoods = (likelihoods[context.crp.z[t0]]
                                       for context, likelihoods
-                                      in zip(self.contexts, self.likelihoods)
-                                      )
+                                      in zip(self.contexts, self.likelihoods))
             # Return the product over all contexts
             return reduce(float.__mul__, contextlikelihoods, 1.)
 
@@ -332,21 +390,6 @@ class ContextClusterMixture(object):
             def contexttablelikelihood(n, tj):
                 return self.likelihoods[j][tj]
             return contexttablelikelihood
-
-    def sampleandsit(self, n):
-        likelihoods = self.Likelihoods(self.contexts, n)
-        t0 = self.G0.sampleandsit(n, likelihoods.tablelikelihood)
-        # Did we sit at a new table in G0?
-        if 1 == self.G0.m[t0]:
-            # Yes so choose a table in each context level DP
-            for j, context in enumerate(self.contexts):
-                context.crp.sampleandsit(
-                    t0,
-                    likelihoods.contexttablelikelihoodfn(j))
-        # Update psi at context level
-        for context in self.contexts:
-            tj = context.crp.z[t0]
-            context.sitdown(n, tj)
 
 
 if '__main__' == __name__:
