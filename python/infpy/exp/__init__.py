@@ -64,8 +64,8 @@ We can also sample from exponential family distributions.
            [-0.61,  0.37],
            [-0.53,  0.28],
            [-1.07,  1.15]])
-    >>> map(family.x, Tsampled)           # Convert to natural form
-    [1.6243453636632417, -0.61175641365007538, -0.5281717522634557, -1.0729686221561705]
+    >>> npy.array(map(family.x, Tsampled))           # Convert to natural form
+    array([ 1.62, -0.61, -0.53, -1.07])
 
 
 """
@@ -84,16 +84,18 @@ _log_2_pi = log(2 * pi)
 
 
 def log_multivariate_gamma(p, a):
-    """
-    The logarithm of the U{multivariate gamma function<http://en.wikipedia.org/wiki/Multivariate_gamma_function>}
-    """
-    return (p * (p - 1.) / 4.) * log(pi) + sum(gammaln((2. * a - j) / 2.) for j in xrange(p))
+
+    """ The logarithm of the `multivariate gamma
+    function<http://en.wikipedia.org/wiki/Multivariate_gamma_function>`_ """
+
+    return (p * (p - 1.) / 4.) * log(pi) + sum(gammaln((2. * a - j) / 2.)
+                                               for j in xrange(p))
 
 
 def log_factorial(n):
     """
     @arg n: An integer >= 0
-    @return: log n!
+    log n!
     """
     assert n >= 0, 'n must be >= 0: n=%d' % n
     return sum(log(i) for i in xrange(1, n + 1))
@@ -102,7 +104,7 @@ def log_factorial(n):
 def factorial(n):
     """
     @arg n: An integer >= 0
-    @return: n!
+    n!
     """
     assert n >= 0, 'n must be >= 0: n=%d' % n
     return reduce(long.__mul__, xrange(1, n + 1), 1L)
@@ -110,9 +112,8 @@ def factorial(n):
 
 class Variable(object):
 
-    """
-    An exponential family variable has a family and natural parameters for that family.
-    """
+    """ An exponential family variable has a family and natural parameters for
+    that family.  """
 
     def __init__(self, family, eta):
         "Initialise the variable."
@@ -151,45 +152,55 @@ class ExponentialFamily(object):
     *Conversion* methods include:
 
     - theta(eta) : converts from natural parameters to canonical parameters
-    - x(T) : converts from canonical parameters to natural parameters if it differs from 0.0
+    - x(T) : converts from canonical parameters to natural parameters if it
+      differs from 0.0
     - dimension : returns the length of eta and T
     - normalisation_dimension : returns the length of A
 
     The following *sampling* methods are optional:
 
-    - sample_theta(theta, size=1) : returns a sample from the distribution parameterised by theta
-    - sample_eta(eta, size=1) : returns a sample from the distribution parameterised by eta
+    - sample_theta(theta, size=1) : returns a sample from the distribution
+      parameterised by theta
+    - sample_eta(eta, size=1) : returns a sample from the distribution
+      parameterised by eta
 
     The following *special* methods are optional:
 
-    - exp_T(eta) : returns :math:`d(A)/d(eta)`, the derivative of the normalization factor with respect to
-        the natural parameter, evaluated at eta. This is equivalent to the expectation of T.
+    - exp_T(eta) : returns :math:`d(A)/d(eta)`, the derivative of the
+      normalization factor with respect to the natural parameter, evaluated at
+      eta. This is equivalent to the expectation of T.
 
     *Testing* methods include:
 
-    - _p_truth(x, theta) : returns :math:`p(x|theta)` calculated by a different method
-        (e.g. scipy.stats) for testing
-    - _entropy_truth(theta) I{optional} : returns entropy of :math:`p(x|theta)` calculated by a different method
-        (e.g. scipy.stats) for testing
+    - _p_truth(x, theta) : returns :math:`p(x|theta)` calculated by a
+      different method (e.g. scipy.stats) for testing
+    - _entropy_truth(theta) I{optional} : returns entropy of :math:`p(x|theta)`
+      calculated by a different method (e.g. scipy.stats) for testing
     - _typical_xs : a sequence of typical x values for the family
     - _typical_thetas : a sequence of typical theta values for the family
     """
 
-    def __init__(self, dimension, normalisation_dimension=1, vectorisable=False):
+    def __init__(self, dimension, normalisation_dimension=1,
+                 vectorisable=False):
         """
-        @arg dimension: The dimension of the sufficient statistics, T, and the natural parameter, eta
-        @arg normalisation_dimension: The length of A(theta). Normally is one when a scalar is returned,
-        can be returned as a vector of the given dimension. This can be useful in conjugate analysis.
-        @arg vectorisable: Can we pass more than one T or eta to the methods of this family?
+        - dimension: The dimension of the sufficient statistics, T, and
+          the natural parameter, eta
+        - normalisation_dimension: The length of A(theta). Normally is one
+          when a scalar is returned, can be returned as a vector of the given
+          dimension. This can be useful in conjugate analysis.
+        - vectorisable: Can we pass more than one T or eta to the methods of
+          this family?
         """
 
         self.dimension = dimension
-        "The dimension of the sufficient statistics, T, and the natural parameter, eta"
+        """The dimension of the sufficient statistics, T, and the natural
+        parameter, eta"""
 
         self.normalisation_dimension = normalisation_dimension
         """
-        The length of A(theta). Normally one when a scalar is returned, can be returned as a vector of the
-        given dimension. This can be useful in conjugate analysis.
+        The length of A(theta). Normally one when a scalar is returned, can
+        be returned as a vector of the given dimension. This can be useful
+        in conjugate analysis.
         """
 
         self.vectorisable = vectorisable
@@ -202,7 +213,7 @@ class ExponentialFamily(object):
         The default measure for x.
 
         @param T: x's sufficient statistic
-        @return: 0.0
+        0.0
         """
         return 0.0
 
@@ -217,7 +228,7 @@ class ExponentialFamily(object):
         """
         @param x: the random variable in canonical form
         @param theta: the parameter in canonical form
-        @return: :math:`log p(x|theta)`
+        :math:`log p(x|theta)`
         """
         return self.log_p_T(self.T(x), self.eta(theta))
 
@@ -225,13 +236,14 @@ class ExponentialFamily(object):
         """
         @param T: the random variable's sufficient statistics
         @param eta: the family's parameter in natural form
-        @return: :math:`log p(T|eta)`
+        :math:`log p(T|eta)`
         """
         return dot(T, eta) - self.A(eta) + self.h(T)
 
     def A(self, eta):
         """
-        @return: The normalisation factor (log partition) for the exponential family (as a scalar).
+        The normalisation factor (log partition) for the exponential
+        family (as a scalar).
 
         See A_vec() for the vectorised version.
         """
@@ -239,24 +251,25 @@ class ExponentialFamily(object):
 
     def p_x(self, x, theta):
         """
-        @return: :math:`p(x|theta)`.
+        :math:`p(x|theta)`.
         """
         return exp(self.log_p_x(x, theta))
 
     def p_T(self, T, eta):
         """
-        @return: :math:`p(T|eta)`.
+        :math:`p(T|eta)`.
         """
         return exp(self.log_p_T(T, eta))
 
     def entropy(self, eta):
         """
-        The entropy of the distribution parameterised by eta. The entropy is calculated as the :math:`<-log p(T>|eta)>`,
-        i.e. the expectation of the negative log probability.
-        This relies on the family defining the exp_T(eta) and exp_h(eta) methods.
+        The entropy of the distribution parameterised by eta. The entropy is
+        calculated as the :math:`<-log p(T>|eta)>`, i.e. the expectation of
+        the negative log probability.  This relies on the family defining the
+        exp_T(eta) and exp_h(eta) methods.
 
         @arg eta: the exponential family parameters in natural form
-        @return: The entropy of the family parameterised by eta
+        The entropy of the family parameterised by eta
         """
         assert hasattr(self, 'exp_T'), 'Subclass does not define exp_T'
         assert hasattr(self, 'exp_h'), 'Subclass does not define exp_h'
@@ -264,17 +277,21 @@ class ExponentialFamily(object):
 
     def KL(self, eta_1, eta_2):
         """
-        Returns the Kullback-Leibler divergence between the the distributions in this family parameterised by eta_1 and eta_2.
+        Returns the Kullback-Leibler divergence between the the distributions
+        in this family parameterised by eta_1 and eta_2.
         @arg eta_1: Natural parameters.
         @arg eta_2: Natural parameters.
-        @return: KL(eta_1||eta_2) = E[log p(x|eta_1)] - E[log p(x|eta_2)] where expectations are w.r.t. p(x|eta_1)
+        KL(eta_1||eta_2) = E[log p(x|eta_1)] - E[log p(x|eta_2)]
+        where expectations are w.r.t. p(x|eta_1)
         """
         assert hasattr(self, 'exp_T'), 'Subclass does not define exp_T'
-        return dot(self.exp_T(eta_1), eta_1 - eta_2) - self.A(eta_1) + self.A(eta_2)
+        return (dot(self.exp_T(eta_1), eta_1 - eta_2)
+                - self.A(eta_1) + self.A(eta_2))
 
     def _check_shape(self, arg):
         """
-        @return: True if the argument, for example T or eta, is the correct shape.
+        True if the argument, for example T or eta, is the correct
+        shape.
         """
         if self.vectorisable:
             return arg.shape[-1] == self.dimension
@@ -283,14 +300,14 @@ class ExponentialFamily(object):
 
     def _empty(self):
         """
-        @return: An empty array of the correct size for T or eta.
+        An empty array of the correct size for T or eta.
         """
         return empty((self.dimension,), dtype=float64)
 
     def LL_fns(self, tau, nu):
         """
-        @return: ll, ll_prime, ll_hessian : The log likelihood function and its derivative and hessian for the given
-        tau and nu prior.
+        ll, ll_prime, ll_hessian : The log likelihood function and its
+        derivative and hessian for the given tau and nu prior.
         """
         def ll(eta):
             return dot(eta, tau) - nu * self.A(eta)
@@ -345,7 +362,7 @@ class GaussianExpFamily(ExponentialFamily):
         The default measure for x.
 
         @param T: x's sufficient statistic
-        @return: 0.0
+        0.0
         """
         return - .5 * _log_2_pi
 
@@ -357,38 +374,39 @@ class GaussianExpFamily(ExponentialFamily):
         return - .5 * _log_2_pi
 
     def T(self, x):
-        "@return: T(x), the sufficient statistics of x"
+        "T(x), the sufficient statistics of x"
         return array([x, x * x]).T
 
     def exp_T(self, eta):
         """
         @arg eta: The natural parameters.
-        @return: The expectation of T, the sufficient statistics, given eta.
+        The expectation of T, the sufficient statistics, given eta.
         """
         (mu, gamma) = self.theta(eta)
         return array([mu, mu ** 2 + 1. / gamma])
 
     def x(self, T):
-        "@return: x(T), the x that has the sufficient statistics, T"
+        "x(T), the x that has the sufficient statistics, T"
         # assert self._check_shape(
         #     T), 'T does not have the correct shape: %s' % str(T.shape)
         return npy.take(T, 0, -1)
 
     def eta(self, theta):
-        r""":math:`\eta(\theta)`, the natural parameter :math:`\eta`, that corresponds to
-        the canonical parameter, :math:`\theta`.
+        r""":math:`\eta(\theta)`, the natural parameter :math:`\eta`, that
+        corresponds to the canonical parameter, :math:`\theta`.
         """
         theta = asarray(theta, dtype=float)
         return array([theta[0] * theta[1], -theta[1] / 2])
 
     def theta(self, eta):
-        "@return: theta(eta), the canonical parameter, theta, that corresponds to the natural parameter, eta"
+        """theta(eta), the canonical parameter, theta, that
+        corresponds to the natural parameter, eta"""
         assert self._check_shape(eta)
         gamma = -2 * eta[1]
         return (eta[0] / gamma, gamma)
 
     def A_vec(self, eta):
-        "@return: The normalization factor (log partition)"
+        "The normalization factor (log partition)"
         (mu, gamma) = self.theta(eta)
         return .5 * array([-log(gamma), gamma * mu * mu])
 
@@ -396,21 +414,23 @@ class GaussianExpFamily(ExponentialFamily):
         """
         @param eta: the natural parameters
         @param size: the size of the sample
-        @return: A sample of sufficient statistics
+        A sample of sufficient statistics
         """
         (mu, gamma) = self.theta(eta)
         return self.T(norm.rvs(size=size, loc=mu, scale=1 / sqrt(gamma)))
 
     def _p_truth(self, x, theta):
         """
-        @return: :math:`log p(x|theta)` calculated by an independent method. (Primarily for testing purposes)
+        :math:`log p(x|theta)` calculated by an independent method.
+        (Primarily for testing purposes)
         """
         (mu, gamma) = theta
         return norm.pdf(x, loc=mu, scale=1 / sqrt(gamma))
 
     def _entropy_truth(self, theta):
         """
-        @return: entropy of :math:`p(x|theta)` calculated by an independent method. (Primarily for testing purposes)
+        entropy of :math:`p(x|theta)` calculated by an independent
+        method. (Primarily for testing purposes)
         """
         (_mu, gamma) = theta
         return .5 * (1. + _log_2_pi - log(gamma))
@@ -451,57 +471,64 @@ class DirichletExpFamily(ExponentialFamily):
     "A sequence of typical theta values for this family."
 
     def T(self, x):
-        "@return: T(x), the sufficient statistics of x"
+        "T(x), the sufficient statistics of x"
         return log(x)
 
     def exp_T(self, eta):
         """
         @arg eta: The natural parameters.
-        @return: The expectation of T, the sufficient statistics, given eta.
+        The expectation of T, the sufficient statistics, given eta.
         """
         theta = self.theta(eta)
-        return digamma(theta) - digamma(theta.sum(axis=-1)).reshape(theta.shape[:-1] + (1,))
+        return (digamma(theta)
+                - digamma(theta.sum(axis=-1)).reshape(theta.shape[:-1] + (1,)))
 
     def cov_T(self, eta):
         """
         @arg eta: The natural parameters.
-        @return: The covariance of T_i, T_j, the sufficient statistics, given eta.
+        The covariance of T_i, T_j, the sufficient statistics, given
+        eta.
         """
         theta = self.theta(eta)
         assert (self.dimension,) == theta.shape
         return diag(polygamma(1, theta)) - polygamma(1, theta.sum())
 
     def x(self, T):
-        "@return: x(T), the x that has the sufficient statistics, T"
+        "x(T), the x that has the sufficient statistics, T"
         assert self._check_shape(
             T), 'T does not have the correct shape: %s' % str(T.shape)
         return exp(T)
 
     def eta(self, theta):
-        "@return: eta(theta), the natural parameter, eta, that corresponds to the canonical parameter, theta"
+        """eta(theta), the natural parameter, eta, that corresponds to
+        the canonical parameter, theta"""
         return theta - 1.
 
     def theta(self, eta):
-        "@return: theta(eta), the canonical parameter, theta, that corresponds to the natural parameter, eta"
+        """theta(eta), the canonical parameter, theta, that corresponds
+        to the natural parameter, eta"""
         assert self._check_shape(eta)
         return eta + 1.
 
     def A_vec(self, eta):
-        "@return: The normalization factor (log partition)"
-        return (gammaln(eta + 1).sum(axis=-1) - gammaln(eta.sum(axis=-1) + self.dimension)).reshape(eta.shape[:-1] + (1,))
+        "The normalization factor (log partition)"
+        return (gammaln(eta + 1).sum(axis=-1)
+                - gammaln(eta.sum(axis=-1)
+                          + self.dimension)).reshape(eta.shape[:-1] + (1,))
 
     def sample(self, eta, size=1):
         """
         @param eta: the natural parameters
         @param size: the size of the sample
-        @return: A sample of sufficient statistics
+        A sample of sufficient statistics
         """
         from numpy.random import dirichlet
         return self.T(dirichlet(self.theta(eta), size=size))
 
     def _p_truth(self, x, theta):
         """
-        @return: :math:`log p(x|theta)` calculated by an independent method. (Primarily for testing purposes)
+        :math:`log p(x|theta)` calculated by an independent method.
+        (Primarily for testing purposes)
         """
         assert len(x) == len(theta)
         return exp(
@@ -526,10 +553,12 @@ class DirichletExpFamily(ExponentialFamily):
 
 class GammaExpFamily(ExponentialFamily):
 
-    """
-    The U{gamma distribution<http://en.wikipedia.org/wiki/Gamma_distribution>} in exponential family form.
+    """ The `gamma
+    distribution<http://en.wikipedia.org/wiki/Gamma_distribution>`_ in
+    exponential family form.
 
-            - theta = (a,b) where a is the shape and b is the rate (inverse scale)
+            - theta = (a,b) where a is the shape and b is the
+              rate (inverse scale)
             - eta = (-b, a-1)
             - T(x) = (x, log(x))
             - A(theta) = log Gamma(a) - a log(b)
@@ -556,35 +585,37 @@ class GammaExpFamily(ExponentialFamily):
         ExponentialFamily.__init__(self, 2)
 
     def T(self, x):
-        "@return: T(x), the sufficient statistics of x"
+        "T(x), the sufficient statistics of x"
         return array((x, log(x))).T
 
     def exp_T(self, eta):
         """
         @arg eta: The natural parameters.
-        @return: The expectation of T, the sufficient statistics, given eta.
+        The expectation of T, the sufficient statistics, given eta.
         """
         (a, b) = self.theta(eta)
         return array((a / b, digamma(a) - log(b)))
 
     def x(self, T):
-        "@return: x(T), the x that has the sufficient statistics, T"
+        "x(T), the x that has the sufficient statistics, T"
         assert self._check_shape(
             T), 'T does not have the correct shape: %s' % str(T.shape)
         return T[0]
 
     def eta(self, theta):
-        "@return: eta(theta), the natural parameter, eta, that corresponds to the canonical parameter, theta"
+        """eta(theta), the natural parameter, eta, that corresponds to
+        the canonical parameter, theta"""
         (a, b) = theta
         return array((-b, a - 1.))
 
     def theta(self, eta):
-        "@return: theta(eta), the canonical parameter, theta, that corresponds to the natural parameter, eta"
+        """theta(eta), the canonical parameter, theta, that corresponds
+        to the natural parameter, eta"""
         assert self._check_shape(eta)
         return array((eta[1] + 1, -eta[0]))
 
     def A_vec(self, eta):
-        "@return: The normalization factor (log partition)"
+        "The normalization factor (log partition)"
         (a, b) = self.theta(eta)
         return array((gammaln(a) - a * log(b),))
 
@@ -592,7 +623,7 @@ class GammaExpFamily(ExponentialFamily):
         """
         @param eta: the natural parameters
         @param size: the size of the sample
-        @return: A sample of sufficient statistics
+        A sample of sufficient statistics
         """
         from numpy.random import gamma
         (a, b) = self.theta(eta)
@@ -600,7 +631,8 @@ class GammaExpFamily(ExponentialFamily):
 
     def _p_truth(self, x, theta):
         """
-        @return: :math:`log p(x|theta)` calculated by an independent method. (Primarily for testing purposes)
+        :math:`log p(x|theta)` calculated by an independent method.
+        (Primarily for testing purposes)
         """
         from scipy.stats import gamma
         (a, b) = theta
@@ -612,7 +644,8 @@ class GammaExpFamily(ExponentialFamily):
 
     def _entropy_truth(self, theta):
         """
-        @return: entropy of :math:`p(x|theta)` calculated by an independent method. (Primarily for testing purposes)
+        entropy of :math:`p(x|theta)` calculated by an independent
+        method. (Primarily for testing purposes)
         """
         (a, b) = theta
         return a - log(b) + gammaln(a) + (1. - a) * digamma(a)
@@ -620,8 +653,9 @@ class GammaExpFamily(ExponentialFamily):
 
 class PoissonExpFamily(ExponentialFamily):
 
-    """
-    The U{Poisson distribution<http://en.wikipedia.org/wiki/Poisson_distribution>} in exponential family form.
+    """ The `Poisson
+    distribution<http://en.wikipedia.org/wiki/Poisson_distribution>`_ in
+    exponential family form.
 
             - theta = lambda where lambda is the rate parameter
             - eta = log lambda
@@ -651,35 +685,37 @@ class PoissonExpFamily(ExponentialFamily):
         ExponentialFamily.__init__(self, 1)
 
     def T(self, x):
-        "@return: T(x), the sufficient statistics of x"
+        "T(x), the sufficient statistics of x"
         return asarray([x])
 
     def exp_T(self, eta):
         """
         @arg eta: The natural parameters.
-        @return: The expectation of T, the sufficient statistics, given eta.
+        The expectation of T, the sufficient statistics, given eta.
         """
         _lambda = self.theta(eta)
         return self.T(_lambda)
 
     def x(self, T):
-        "@return: x(T), the x that has the sufficient statistics, T"
+        "x(T), the x that has the sufficient statistics, T"
         assert self._check_shape(
             T), 'T does not have the correct shape: %s' % str(T.shape)
         return T[0]
 
     def eta(self, theta):
-        "@return: eta(theta), the natural parameter, eta, that corresponds to the canonical parameter, theta"
+        """eta(theta), the natural parameter, eta, that corresponds
+        to the canonical parameter, theta"""
         _lambda = theta
         return log(asarray([_lambda]))
 
     def theta(self, eta):
-        "@return: theta(eta), the canonical parameter, theta, that corresponds to the natural parameter, eta"
+        """theta(eta), the canonical parameter, theta, that
+        corresponds to the natural parameter, eta"""
         assert self._check_shape(eta)
         return exp(eta[0])
 
     def A_vec(self, eta):
-        "@return: The normalization factor (log partition)"
+        "The normalization factor (log partition)"
         _lambda = self.theta(eta)
         return array((_lambda,))
 
@@ -716,7 +752,7 @@ class PoissonExpFamily(ExponentialFamily):
         """
         @param eta: the natural parameters
         @param size: the size of the sample
-        @return: A sample of sufficient statistics
+        A sample of sufficient statistics
         """
         from numpy.random import poisson
         _lambda = self.theta(eta)
@@ -724,7 +760,8 @@ class PoissonExpFamily(ExponentialFamily):
 
     def _p_truth(self, x, theta):
         """
-        @return: :math:`log p(x|theta)` calculated by an independent method. (Primarily for testing purposes)
+        :math:`log p(x|theta)` calculated by an independent method.
+        (Primarily for testing purposes)
         """
         _lambda = theta
         return _lambda ** x * exp(-_lambda) / factorial(x)
@@ -733,7 +770,8 @@ class PoissonExpFamily(ExponentialFamily):
 class DiscreteExpFamily(ExponentialFamily):
 
     """
-    The discrete distribution in exponential family form. Also known as the multinomial distribution.
+    The discrete distribution in exponential family form. Also known as
+    the multinomial distribution.
 
             - T(x) = delta(x=i)
             - theta = (p1, ..., pk)
@@ -746,7 +784,8 @@ class DiscreteExpFamily(ExponentialFamily):
         Initialise the discrete distribution.
         @arg k: number of possible outcomes
         """
-        ExponentialFamily.__init__(self, dimension=k, normalisation_dimension=0)
+        ExponentialFamily.__init__(self, dimension=k,
+                                   normalisation_dimension=0)
 
     _typical_xs = [
         0,
@@ -761,7 +800,7 @@ class DiscreteExpFamily(ExponentialFamily):
     "A sequence of typical theta values for this family."
 
     def T(self, x):
-        "@return: T(x), the sufficient statistics of x"
+        "T(x), the sufficient statistics of x"
         T = zeros(self.dimension)
         T[x] = 1.0
         return T
@@ -769,12 +808,12 @@ class DiscreteExpFamily(ExponentialFamily):
     def exp_T(self, eta):
         """
         @arg eta: The natural parameters.
-        @return: The expectation of T, the sufficient statistics, given eta.
+        The expectation of T, the sufficient statistics, given eta.
         """
         return self.theta(eta)
 
     def x(self, T):
-        "@return: x(T), the x that has the sufficient statistics, T"
+        "x(T), the x that has the sufficient statistics, T"
         assert self._check_shape(
             T), 'T does not have the correct shape: %s' % str(T.shape)
         for x in xrange(self.dimension):
@@ -784,59 +823,69 @@ class DiscreteExpFamily(ExponentialFamily):
             raise RuntimeError("Could not find positive value in u")
 
     def eta(self, theta):
-        "@return: eta(theta), the natural parameter, eta, that corresponds to the canonical parameter, theta"
+        """eta(theta), the natural parameter, eta, that corresponds
+        to the canonical parameter, theta"""
         return log(theta)
 
     def theta(self, eta):
-        "@return: theta(eta), the canonical parameter, theta, that corresponds to the natural parameter, eta"
+        """theta(eta), the canonical parameter, theta, that
+        corresponds to the natural parameter, eta"""
         assert self._check_shape(eta)
         return exp(eta)
 
     def A_vec(self, eta):
-        "@return: The normalization factor (log partition)"
+        "The normalization factor (log partition)"
         return zeros((0,))
 
     def sample(self, eta, size=1):
         """
         @param eta: the natural parameters
         @param size: the size of the sample
-        @return: A sample of sufficient statistics
+        A sample of sufficient statistics
         """
         from numpy.random import multinomial
         from itertools import chain, repeat
         multi_sample = multinomial(n=size, pvals=self.theta(eta))
-        return array([self.T(x) for x in chain(*[repeat(i, count) for i, count in enumerate(multi_sample)])])
+        return array([self.T(x)
+                      for x
+                      in chain(*[repeat(i, count)
+                                 for i, count
+                                 in enumerate(multi_sample)])])
 
     def _p_truth(self, x, theta):
         """
-        @return: :math:`log p(x|theta)` calculated by an independent method. (Primarily for testing purposes)
+        :math:`log p(x|theta)` calculated by an independent method.
+        (Primarily for testing purposes)
         """
         return theta[x]
 
     def _entropy_truth(self, theta):
         """
-        @return: entropy of :math:`p(x|theta)` calculated by an independent method. (Primarily for testing purposes)
+        entropy of :math:`p(x|theta)` calculated by an independent
+        method. (Primarily for testing purposes)
         """
         return - dot(theta, log(theta))
 
 
 class MvnExpFamily(ExponentialFamily):
 
-    """
-    The U{multi-variate normal distribution<http://en.wikipedia.org/wiki/Multivariate_normal_distribution>} in k
-    dimensions in exponential family form.
+    r""" The `multi-variate normal
+    distribution<http://en.wikipedia.org/wiki/Multivariate_normal_distribution>`_
+    in k dimensions in exponential family form.
 
-            - T(x) = (x, x.x)
-            - theta = (mu,W) where mu is the mean and W is the precision
-            - eta(theta) = (W.mu, W/2)
-            - A(theta) = .5 * (mu.W.mu - log|W| + k.log(2.pi))
+    - k: the number of dimensions
+
+    Exponential family parameterisation:
+
+    - :math:`T(x) = (x, x.x)`
+    - :math:`theta = (mu,W)` where :math:`\mu` is the mean and :math:`W`
+      is the precision
+    - :math:`eta(theta) = (W.mu, W/2)`
+    - :math:`A(theta) = \frac{1}{2} [\mu W \mu - \log|W| + k \log(2\pi)]`
     """
 
     def __init__(self, k=2):
-        """
-        Initialise this exponential family.
-        @arg k: the number of dimensions
-        """
+        """Initialise this exponential family."""
         ExponentialFamily.__init__(self, k * (k + 1), 2)
 
         self.k = k
@@ -866,7 +915,7 @@ class MvnExpFamily(ExponentialFamily):
     "A sequence of typical theta values for this family."
 
     def T(self, x):
-        "@return: T(x), the sufficient statistics of x"
+        "The sufficient statistics of x."
         x = asarray(x)
         T = self._empty()
         T[:self.k] = x
@@ -874,10 +923,7 @@ class MvnExpFamily(ExponentialFamily):
         return T
 
     def exp_T(self, eta):
-        """
-        @arg eta: The natural parameters.
-        @return: The expectation of T, the sufficient statistics, given eta.
-        """
+        """The expectation of T, the sufficient statistics, given eta."""
         (mu, W) = self._mu_W_from_theta(self.theta(eta))
         exp_T = self._empty()
         exp_T[:self.k] = mu
@@ -885,13 +931,14 @@ class MvnExpFamily(ExponentialFamily):
         return exp_T
 
     def x(self, T):
-        "@return: x(T), the x that has the sufficient statistics, T"
+        "x(T), the x that has the sufficient statistics, T."
         assert self._check_shape(
             T), 'T does not have the correct shape: %s' % str(T.shape)
         return T[:self.k]
 
     def eta(self, theta):
-        "@return: eta(theta), the natural parameter, eta, that corresponds to the canonical parameter, theta"
+        """eta(theta), the natural parameter, eta, that corresponds to
+        the canonical parameter, theta."""
         (mu, W) = self._mu_W_from_theta(theta)
         eta = self._empty()
         eta[:self.k] = dot(W, mu)
@@ -899,14 +946,15 @@ class MvnExpFamily(ExponentialFamily):
         return eta
 
     def theta(self, eta):
-        "@return: theta(eta), the canonical parameter, theta, that corresponds to the natural parameter, eta"
+        """theta(eta), the canonical parameter, theta, that
+        corresponds to the natural parameter, eta."""
         assert self._check_shape(eta)
         W = 2. * eta[self.k:].reshape((self.k, self.k))
         mu = solve(W, eta[:self.k])
         return (mu, W)
 
     def A_vec(self, eta):
-        "@return: The normalization factor (log partition)"
+        "The normalization factor (log partition)."
         (mu, W) = self.theta(eta)
         return array([
             .5 * (self.k * _log_2_pi - log(det(W))),
@@ -915,16 +963,18 @@ class MvnExpFamily(ExponentialFamily):
 
     def sample(self, eta, size=1):
         """
-        @param eta: the natural parameters
-        @param size: the size of the sample
-        @return: A sample of sufficient statistics
+        A sample of sufficient statistics of the given size given
+        the natural parameters, eta.
         """
         from numpy.random import multivariate_normal
         mu, W = self._mu_W_from_theta(self.theta(eta))
-        return array([self.T(x) for x in multivariate_normal(mu, inv(W), [size])])
+        return array([self.T(x)
+                      for x
+                      in multivariate_normal(mu, inv(W), [size])])
 
     def _mu_W_from_theta(self, theta):
-        "Helper method to extract mu and W from theta and ensure are correct type and shape."
+        """Helper method to extract mu and W from theta and ensure are
+        correct type and shape."""
         (mu, W) = theta
         mu = asarray(mu)
         W = asarray(W)
@@ -934,24 +984,32 @@ class MvnExpFamily(ExponentialFamily):
 
     def _p_truth(self, x, theta):
         """
-        @return: :math:`log p(x|theta)` calculated by an independent method. (Primarily for testing purposes)
+        :math:`log p(x|theta)` calculated by an independent method.
+        (Primarily for testing purposes)
         """
         (mu, W) = self._mu_W_from_theta(theta)
         x_ = asarray(x) - mu
-        return exp(.5 * (log(det(W)) - self.k * _log_2_pi - dot(dot(x_.T, W), x_)))
+        return exp(.5 * (log(det(W))
+                         - self.k * _log_2_pi
+                         - dot(dot(x_.T, W), x_)))
 
 
 class WishartExpFamily(ExponentialFamily):
 
-    """
-    The U{Wishart distribution<http://en.wikipedia.org/wiki/Wishart_distribution>} in p
-    dimensions in exponential family form.
+    r"""
+    The
+    `Wishart distribution
+    <http://en.wikipedia.org/wiki/Wishart_distribution>`_ in p dimensions
+    in exponential family form.
 
-    - T(W) = [log(det(W)), W.flatten]
-    - theta = (n, V) where n is the degrees of freedom and V, the scale matrix,
-        is typically regarded as the precision
-    - eta(theta) = [n-p-1, -inv(V).flatten()] / 2
-    - A(theta) = (n.p.log 2 + n.log det V) / 2 + log gamma_p (n/2)
+    Exponential family parameterisation:
+
+    - :math:`T(W) = [\log(det(W)), W.flatten]`
+    - :math:`theta = (n, V)` where :math:`n` is the degrees of freedom and
+      :math:`V`, the scale matrix, is typically regarded as the precision
+    - :math:`\eta(\theta) = \frac{1}{2}[n-p-1, -V^{-1}.flatten]`
+    - :math:`A(\theta) = \frac{1}{2}(n p \log 2 + n \log det V)
+      + \log gamma_p (n/2)`
 
     """
 
@@ -974,17 +1032,14 @@ class WishartExpFamily(ExponentialFamily):
     "A sequence of typical theta values for this family."
 
     def __init__(self, p=2):
-        """
-        Initialise this exponential family.
-        @arg p: the number of dimensions
-        """
+        """Initialise this exponential family."""
         ExponentialFamily.__init__(self, p ** 2 + 1)
 
         self.p = p
         "The number of dimensions."
 
     def T(self, x):
-        "@return: T(x), the sufficient statistics of x"
+        "T(x), the sufficient statistics of x."
         x = asarray(x)
         T = self._empty()
         T[0] = log(det(x))
@@ -993,8 +1048,8 @@ class WishartExpFamily(ExponentialFamily):
 
     def exp_T(self, eta):
         """
-        @arg eta: The natural parameters.
-        @return: The expectation of T, the sufficient statistics, given eta.
+        The expectation of T, the sufficient statistics, given
+        the natural parameters, eta.
         """
         assert self._check_shape(eta)
         n, V = self.theta(eta)
@@ -1005,13 +1060,14 @@ class WishartExpFamily(ExponentialFamily):
         return T
 
     def x(self, T):
-        "@return: x(T), the x that has the sufficient statistics, T"
+        "x(T), the x that has the sufficient statistics, T."
         assert self._check_shape(
             T), 'T is not the correct shape: %s' % str(T.shape)
         return asarray(T[1:].reshape((self.p, self.p)))
 
     def eta(self, theta):
-        "@return: eta(theta), the natural parameter, eta, that corresponds to the canonical parameter, theta"
+        """eta(theta), the natural parameter, eta, that corresponds
+        to the canonical parameter, theta."""
         (n, V) = self._n_V_from_theta(theta)
         eta = self._empty()
         eta[0] = n - self.p - 1.
@@ -1020,14 +1076,15 @@ class WishartExpFamily(ExponentialFamily):
         return eta
 
     def theta(self, eta):
-        "@return: theta(eta), the canonical parameter, theta, that corresponds to the natural parameter, eta"
+        """theta(eta), the canonical parameter, theta, that
+        corresponds to the natural parameter, eta."""
         assert self._check_shape(eta)
         n = 2. * eta[0] + 1. + self.p
         V = -inv(2. * eta[1:].reshape((self.p, self.p)))
         return (n, V)
 
     def A_vec(self, eta):
-        "@return: The normalization factor (log partition)"
+        "The normalization factor (log partition)."
         n, V = self.theta(eta)
         return array((.5 * (
             n * (self.p * log(2.) + log(det(V)))
@@ -1035,12 +1092,10 @@ class WishartExpFamily(ExponentialFamily):
 
     def sample(self, eta, size=1):
         """
-        @param eta: the natural parameters
-        @param size: the size of the sample
-        @return: A sample of sufficient statistics
+        A sample of sufficient statistics given the natural parameters, eta.
 
-        This uses the method detailed by
-        U{Smith & Hocking<http://en.wikipedia.org/wiki/Wishart_distribution#Drawing_values_from_the_distribution>}.
+        This uses the method detailed by `Smith & Hocking
+        <http://en.wikipedia.org/wiki/Wishart_distribution#Drawing_values_from_the_distribution>`_.
         """
         from scipy.stats import norm, chi2
         X = empty((size, self.dimension), float64)
@@ -1061,24 +1116,26 @@ class WishartExpFamily(ExponentialFamily):
         return X
 
     def exp_log_det_W(self, eta):
-        """
-        Return the expectation of the log of the determinant of W given eta
-        @arg eta: Natural parameters
-        @return: log|det(W)|
+        r"""
+        Calculate :math:`\log det(W)` given the natural parameters, eta.
         """
         n, V = self.theta(eta)
-        return self.p * log(2.) + log(det(V)) + sum(digamma((n - i) / 2.) for i in xrange(self.p))
+        return (self.p * log(2.)
+                + log(det(V))
+                + sum(digamma((n - i) / 2.) for i in xrange(self.p)))
 
     def _n_V_from_theta(self, theta):
-        "Helper method to extract n and V from theta and ensure are correct type and shape."
+        """Helper method to extract n and V from theta and ensure are
+        correct type and shape."""
         (n, V) = theta
         V = asarray(V)
         assert V.shape == (self.p, self.p)
         return (n, V)
 
     def _p_truth(self, x, theta):
-        """
-        @return: :math:`log p(x|theta)` calculated by an independent method. (Primarily for testing purposes)
+        r"""
+        :math:`log p(x|theta)` calculated by an independent method.
+        (Primarily for testing purposes)
         """
         n, V = self._n_V_from_theta(theta)
         x = asarray(x)
@@ -1096,10 +1153,12 @@ class NormalGammaExpFamily(ExponentialFamily):
     r"""
     A Normal-Gamma distribution in 1 dimension.
     Univariate version of Normal-Wishart multivariate.
-    This is a conjugate prior for the univariate normal (Gaussian) distribution.
+    This is a conjugate prior for the univariate normal (Gaussian)
+    distribution.
 
     - :math:`\gamma|\alpha, \beta \sim \Gamma(\alpha, \beta)`
-    - :math:`\mu|\gamma, \mu_0, \lambda \sim \mathcal{N}(\mu_0, \frac{\lambda}{\gamma})`
+    - :math:`\mu|\gamma, \mu_0, \lambda \sim
+      \mathcal{N}(\mu_0, \frac{\lambda}{\gamma})`
 
     where the parameters are:
 
@@ -1115,8 +1174,8 @@ class NormalGammaExpFamily(ExponentialFamily):
     - :math:`\theta = (\alpha, \beta, \mu_0, \lambda)`
     - :math:`\eta(\theta) = [\alpha-\frac{1}{2}, \frac{1}{2 \lambda},
       \frac{\mu_0}{\lambda}, 2 \beta + \frac{\mu_0^2}{\lambda}]`
-    - :math:`A(\theta) = \alpha \log \beta + \log \Gamma(\alpha) - \frac{1}{2}\log(2
-      \pi \lambda)` """
+    - :math:`A(\theta) = \alpha \log \beta + \log \Gamma(\alpha)
+      - \frac{1}{2}\log(2 \pi \lambda)` """
 
     _typical_xs = [
         [0., 1.],
@@ -1157,7 +1216,7 @@ class NormalGammaExpFamily(ExponentialFamily):
         ExponentialFamily.__init__(self, 4)
 
     def T(self, x):
-        "@return: T(x), the sufficient statistics of x"
+        "T(x), the sufficient statistics of x"
         # [log gamma, mu**2 gamma, mu*gamma, -gamma/2]
         mu, gamma = x
         T = self._empty()
@@ -1170,7 +1229,7 @@ class NormalGammaExpFamily(ExponentialFamily):
     def exp_T(self, eta):
         """
         @arg eta: The natural parameters.
-        @return: The expectation of T, the sufficient statistics, given eta.
+        The expectation of T, the sufficient statistics, given eta.
         """
         alpha, beta, mu_0, _lambda = self.theta(eta)
         ab_ratio = alpha / beta
@@ -1182,7 +1241,7 @@ class NormalGammaExpFamily(ExponentialFamily):
         return T
 
     def x(self, T):
-        "@return: x(T), the x that has the sufficient statistics, T"
+        "x(T), the x that has the sufficient statistics, T"
         assert self._check_shape(
             T), 'T is not the correct shape: %s' % str(T.shape)
         gamma = -2. * T[3]
@@ -1190,7 +1249,8 @@ class NormalGammaExpFamily(ExponentialFamily):
         return array((mu, gamma))
 
     def eta(self, theta):
-        "@return: eta(theta), the natural parameter, eta, that corresponds to the canonical parameter, theta"
+        """eta(theta), the natural parameter, eta, that
+        corresponds to the canonical parameter, theta"""
         alpha, beta, mu_0, _lambda = theta
         eta = self._empty()
         eta[0] = 2. * alpha - 1.
@@ -1200,7 +1260,8 @@ class NormalGammaExpFamily(ExponentialFamily):
         return eta
 
     def theta(self, eta):
-        "@return: theta(eta), the canonical parameter, theta, that corresponds to the natural parameter, eta"
+        """theta(eta), the canonical parameter, theta, that
+        corresponds to the natural parameter, eta"""
         assert self._check_shape(eta)
         alpha = (eta[0] + 1.) / 2.
         _lambda = 1. / eta[1]
@@ -1209,7 +1270,7 @@ class NormalGammaExpFamily(ExponentialFamily):
         return (alpha, beta, mu_0, _lambda)
 
     def A_vec(self, eta):
-        "@return: The normalization factor (log partition)"
+        "The normalization factor (log partition)"
         alpha, beta, _mu_0, _lambda = self.theta(eta)
         return array((
             gammaln(alpha)
@@ -1221,7 +1282,7 @@ class NormalGammaExpFamily(ExponentialFamily):
         """
         @param eta: the natural parameters
         @param size: the size of the sample
-        @return: A sample of sufficient statistics
+        A sample of sufficient statistics
         """
         # from IPython.Debugger import Pdb; Pdb().set_trace()
         samples = empty((size, self.dimension))
@@ -1231,18 +1292,22 @@ class NormalGammaExpFamily(ExponentialFamily):
         assert len(gammas) == size
         for i, gamma in enumerate(gammas):
             mu = self.gaussian.x(
-                self.gaussian.sample(eta=self.gaussian.eta((mu_0, gamma / _lambda)), size=1)[0])
+                self.gaussian.sample(eta=self.gaussian.eta((mu_0,
+                                                            gamma / _lambda)),
+                                     size=1)[0])
             samples[i] = self.T((mu, gamma))
         assert len(samples) == size
         return samples
 
     def _p_truth(self, x, theta):
         """
-        @return: :math:`log p(x|theta)` calculated by an independent method. (Primarily for testing purposes)
+        :math:`log p(x|theta)` calculated by an independent method.
+        (Primarily for testing purposes)
         """
         alpha, beta, mu_0, _lambda = theta
         mu, gamma = x
-        return self.gamma._p_truth(gamma, (alpha, beta)) * self.gaussian._p_truth(mu, (mu_0, gamma / _lambda))
+        return (self.gamma._p_truth(gamma, (alpha, beta))
+                * self.gaussian._p_truth(mu, (mu_0, gamma / _lambda)))
 
 
 class NormalWishartExpFamily(ExponentialFamily):
@@ -1268,8 +1333,8 @@ class NormalWishartExpFamily(ExponentialFamily):
      - :math:`\theta = (\nu, S, \kappa_0, \mu_0)`
      - :math:`\eta(\theta) = [\kappa_0, \nu-p, -\kappa_0.\mu_0,
        \kappa_0.\mu_0.\mu_0'-inv(S)]`
-     - :math:`A(\theta) = p/2[(p+1)\log 2 - (\nu-p-1)\log(\pi) - \log \kappa_0] +
-       \nu/2 \log|S| + \log \Gamma_p(\nu/2)`
+     - :math:`A(\theta) = p/2[(p+1)\log 2 - (\nu-p-1)\log(\pi) - \log \kappa_0]
+       + \nu/2 \log|S| + \log \Gamma_p(\nu/2)`
     """
 
     _typical_xs = [
@@ -1311,7 +1376,7 @@ class NormalWishartExpFamily(ExponentialFamily):
         "The dimension of mu"
 
     def T(self, x):
-        "@return: T(x), the sufficient statistics of x"
+        "T(x), the sufficient statistics of x"
         mu, W = x
         T = self._empty()
         T[2:] = self.mvn.eta(x)
@@ -1322,24 +1387,26 @@ class NormalWishartExpFamily(ExponentialFamily):
     def exp_T(self, eta):
         """
         @arg eta: The natural parameters.
-        @return: The expectation of T, the sufficient statistics, given eta.
+        The expectation of T, the sufficient statistics, given eta.
         """
         nu, S, _kappa_0, mu_0 = self.theta(eta)
         T = self._empty()
         T[0] = (log(det(S)) + sum(digamma((nu - i) / 2.)
-                                  for i in xrange(self.p)) - self.p * log(pi)) / 2.
+                                  for i
+                                  in xrange(self.p)) - self.p * log(pi)) / 2.
         T[2:] = self.mvn.eta((mu_0, nu * S))
         T[1] = - dot(mu_0, T[2:2 + self.p]) / 2.
         return T
 
     def x(self, T):
-        "@return: x(T), the x that has the sufficient statistics, T"
+        "x(T), the x that has the sufficient statistics, T"
         assert self._check_shape(
             T), 'T is not the correct shape: %s' % str(T.shape)
         return self.mvn.theta(T[2:])
 
     def eta(self, theta):
-        "@return: eta(theta), the natural parameter, eta, that corresponds to the canonical parameter, theta"
+        """eta(theta), the natural parameter, eta, that
+        corresponds to the canonical parameter, theta"""
         nu, S, kappa_0, mu_0 = self._unpack_theta(theta)
         eta = self._empty()
         eta[0] = nu - self.p
@@ -1350,7 +1417,8 @@ class NormalWishartExpFamily(ExponentialFamily):
         return eta
 
     def theta(self, eta):
-        "@return: theta(eta), the canonical parameter, theta, that corresponds to the natural parameter, eta"
+        """theta(eta), the canonical parameter, theta, that
+        corresponds to the natural parameter, eta"""
         assert self._check_shape(eta)
         nu = eta[0] + self.p
         kappa_0 = eta[1]
@@ -1360,7 +1428,7 @@ class NormalWishartExpFamily(ExponentialFamily):
         return (nu, S, kappa_0, mu_0)
 
     def A_vec(self, eta):
-        "@return: The normalization factor (log partition)"
+        "The normalization factor (log partition)"
         nu, S, kappa_0, _mu_0 = self.theta(eta)
         return array(((
             ((self.p + 1.) * log(2.) - (nu - self.p - 1.)
@@ -1373,7 +1441,7 @@ class NormalWishartExpFamily(ExponentialFamily):
         """
         @param eta: the natural parameters
         @param size: the size of the sample
-        @return: A sample of sufficient statistics
+        A sample of sufficient statistics
         """
         # from IPython.Debugger import Pdb; Pdb().set_trace()
         samples = empty((size, self.dimension))
@@ -1383,7 +1451,8 @@ class NormalWishartExpFamily(ExponentialFamily):
         assert len(Ws) == size
         for i, W in enumerate(Ws):
             mu = self.mvn.x(
-                self.mvn.sample(eta=self.mvn.eta((mu_0, W * kappa_0)), size=1)[0])
+                self.mvn.sample(eta=self.mvn.eta((mu_0, W * kappa_0)),
+                                size=1)[0])
             samples[i] = self.T((mu, W))
         assert len(samples) == size
         return samples
@@ -1402,13 +1471,15 @@ class NormalWishartExpFamily(ExponentialFamily):
 
     def _p_truth(self, x, theta):
         """
-        @return: :math:`log p(x|theta)` calculated by an independent method. (Primarily for testing purposes)
+        :math:`log p(x|theta)` calculated by an independent method.
+        (Primarily for testing purposes)
         """
         nu, S, kappa_0, mu_0 = self._unpack_theta(theta)
         mu, W = x
         mu = asarray(mu)
         W = asarray(W)
-        return self.wishart._p_truth(W, (nu, S)) * self.mvn._p_truth(mu, (mu_0, W * kappa_0))
+        return (self.wishart._p_truth(W, (nu, S))
+                * self.mvn._p_truth(mu, (mu_0, W * kappa_0)))
 
 
 class ConjugatePrior(object):
@@ -1419,23 +1490,28 @@ class ConjugatePrior(object):
     def __init__(self, likelihood, prior):
         """
         Initialise a conjugate prior exponential family.
-        @arg likelihood: The exponential family whose parameters we have a conjugate prior for.
-        @arg prior: The exponential family that is a conjugate prior over the likelihood's parameters.
+        @arg likelihood: The exponential family whose parameters we have a
+          conjugate prior for.
+        @arg prior: The exponential family that is a conjugate prior over
+          the likelihood's parameters.
         """
         self.likelihood = likelihood
         "The exponential family whose parameters we have a conjugate prior for"
 
         self.prior = prior
-        "The exponential family that is a conjugate prior over the likelihood's parameters"
+        """The exponential family that is a conjugate prior over the
+        likelihood's parameters"""
 
         self.likelihood_dimension = self.likelihood.dimension
-        "The dimension of the natural parameters and sufficient statistics of the likelihood."
+        """The dimension of the natural parameters and sufficient statistics
+        of the likelihood."""
 
         self.strength_dimension = self.prior.dimension - \
             self.likelihood_dimension
         "The dimension of the strength part of the prior's natural parameters."
 
-        assert self.strength_dimension == self.likelihood.normalisation_dimension
+        assert self.strength_dimension == \
+            self.likelihood.normalisation_dimension
 
     def add_observations_to_prior(self, T, tau, n=1):
         """
@@ -1452,7 +1528,7 @@ class ConjugatePrior(object):
         @arg T: the data drawn from the likelihood.
         @arg tau: the natural parameter for this conjugate prior distribution
         @arg n: the number of data drawn from the likelihood.
-        @return: log of the predictive pdf for data, T, from the likelihood,
+        log of the predictive pdf for data, T, from the likelihood,
         given the prior's parameters, tau.
         """
         assert self.likelihood._check_shape(T)
@@ -1474,7 +1550,7 @@ class GaussianConjugatePrior(ConjugatePrior):
     def exp_likelihood_log_normalisation_factor(self, tau):
         """
         @arg tau: the parameters of the prior in standard form
-        @return: the expectation of the log normalisation factor
+        the expectation of the log normalisation factor
         of the likelihood given the prior's parameters
         """
         alpha, beta, mu_0, _lambda = self.prior.theta(tau)
@@ -1491,14 +1567,15 @@ class MvnConjugatePrior(ConjugatePrior):
     """
 
     def __init__(self, p=2):
-        "Initialise the Normal-Wishart - Multivariate Normal conjugate prior pair"
+        """Initialise the Normal-Wishart - Multivariate Normal conjugate prior
+        pair"""
         ConjugatePrior.__init__(
             self, MvnExpFamily(p), NormalWishartExpFamily(p))
 
     def exp_likelihood_log_normalisation_factor(self, tau):
         """
-        @arg tau: the parameters of the prior in standard form
-        @return: the expectation of the log normalisation factor of the likelihood given the prior's parameters
+        The expectation of the log normalisation factor of the
+        likelihood given the prior's parameters, tau in standard form.
         """
         nu, S, kappa_0, mu_0 = self.prior.theta(tau)
         return (
@@ -1524,6 +1601,7 @@ class MultinomialConjugatePrior(ConjugatePrior):
     def exp_likelihood_log_normalisation_factor(self, tau):
         """
         @arg tau: the parameters of the prior in standard form
-        @return: the expectation of the log normalisation factor of the likelihood given the prior's parameters
+        the expectation of the log normalisation factor of the
+          likelihood given the prior's parameters
         """
         return 0.
