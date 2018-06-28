@@ -61,7 +61,7 @@ class GaussianProcess(object):
             x2 = x1
 
         def f(i1, i2):
-          return self.k(x1[i1], x2[i2], symmetric and i1 == i2)
+            return self.k(x1[i1], x2[i2], symmetric and i1 == i2)
         return \
             infpy.matrix_from_function(
                 f,
