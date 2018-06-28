@@ -86,14 +86,15 @@ for m in xrange(options.num_models_to_test):
     model = hdpm.HDPM(documents, W, K)
 
     # burn in for some iterations
-    #model.update()
-    #model.update()
+    # model.update()
+    # model.update()
 
     # start checking the LL
     LL = model.log_likelihood()
     checker = LLchecker('FINE', LL)
     coarse_checker = LLchecker('COARSE', LL)
-    convergence_test = LlConvergenceTest(eps=.01, should_increase=False, use_absolute_difference=True)
+    convergence_test = LlConvergenceTest(
+        eps=.01, should_increase=False, use_absolute_difference=True)
     for iter in xrange(options.max_iters):
 
         for update_fn in hdpm.HDPM.update_fns:
@@ -110,4 +111,5 @@ for m in xrange(options.num_models_to_test):
         if convergence_test(model.log_likelihood()):
             break
 
-    logging.info('Ran % 3d iterations to get to LL=%f', iter+1, model.log_likelihood())
+    logging.info('Ran % 3d iterations to get to LL=%f',
+                 iter + 1, model.log_likelihood())

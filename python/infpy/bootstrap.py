@@ -8,7 +8,9 @@ Code to handle bootstrap analyses.
 """
 
 from itertools import cycle
-import random, bisect
+import random
+import bisect
+
 
 def generate_bootstrap_samples(num_samples, test_universe, test_set_sizes):
     """

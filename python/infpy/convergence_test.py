@@ -3,10 +3,12 @@
 #
 
 """
-Code to implement convergence tests (primarily for sequences of log likelihoods).
+Code to implement convergence tests (primarily for sequences of log
+likelihoods).
 """
 
 import logging
+
 
 def check_LL_increased(last_LL, LL, tag="", tolerance=.01, raise_error=True):
     """
@@ -15,10 +17,10 @@ def check_LL_increased(last_LL, LL, tag="", tolerance=.01, raise_error=True):
     the first by at least tolerance, raises an error.
     """
     LL_sum, last_LL_sum = LL.sum(), last_LL.sum()
-    abs_change = LL_sum - last_LL_sum 
+    abs_change = LL_sum - last_LL_sum
     if abs_change < -tolerance:
         msg = '%s: LL has decreased %f from %f to %f:\nFrom:%s\nTo:  %s\nDiff:%s' % (
-            tag, LL_sum - last_LL_sum, last_LL_sum, LL_sum, last_LL, LL, LL-last_LL
+            tag, LL_sum - last_LL_sum, last_LL_sum, LL_sum, last_LL, LL, LL - last_LL
         )
         logging.warning(msg)
         if raise_error:
@@ -26,12 +28,8 @@ def check_LL_increased(last_LL, LL, tag="", tolerance=.01, raise_error=True):
     return LL
 
 
-
-
-
 class LlConvergenceTest(object):
     """Tests for convergence of a series of log likelihoods."""
-
 
     def __init__(self, eps=1e-8, should_increase=True, use_absolute_difference=False):
         """
@@ -64,7 +62,7 @@ class LlConvergenceTest(object):
                         'Iteration %4d: Log likelihoods are not increasing as expected: %f < %f'
                         % (len(self.LLs), self.LLs[-1], self.LLs[-2])
                     )
-                    #raise RuntimeError('Log likelihoods are not increasing as expected: %f < %f' % (self.LLs[-1], self.LLs[-2]))
+                    # raise RuntimeError('Log likelihoods are not increasing as expected: %f < %f' % (self.LLs[-1], self.LLs[-2]))
             diff = self.LLs[-1] - self.LLs[-2]
             if self.use_absolute_difference:
                 diff = abs(diff)

@@ -8,6 +8,7 @@ The attributes of data we analyse with decision trees.
 Not an attribute in the python sense
 """
 
+
 class Attribute(object):
     """
     An attribute of the data to be classified
@@ -15,8 +16,8 @@ class Attribute(object):
     Not an attribute in the python sense
     """
 
-    def __init__(self, name, fn): self.fn = fn; self.name = name
-
+    def __init__(self, name, fn): self.fn = fn
+    self.name = name
 
 
 class OrdinalAttribute(Attribute):
@@ -29,7 +30,6 @@ class OrdinalAttribute(Attribute):
         self.num_values = num_values
 
 
-
 class EnumerativeAttribute(Attribute):
     """
     An enumerative attribute of the data to be classified
@@ -38,8 +38,6 @@ class EnumerativeAttribute(Attribute):
     def __init__(self, name, fn, num_values):
         super(EnumerativeAttribute, self).__init__(name, fn)
         self.num_values = num_values
-
-
 
 
 class ContinuousAttribute(Attribute):

@@ -65,9 +65,6 @@ class FactorGraph(object):
         return [v for v in g.vertices if None != variables[v]]
 
 
-
-
-
 class VarDist(object):
     "A variational distribution."
     pass
@@ -78,6 +75,7 @@ class VarDistObserved(VarDist):
     A variational distribution for an observed value. This is really just a delta distribution on the
     observed value
     """
+
     def __init__(self, observed_value):
         self.observed_value = observed_value
 
@@ -102,6 +100,7 @@ class VarDistObserved(VarDist):
 
 class VarDistHidden(VarDist):
     "A variational distribution."
+
     def update(self, expectations):
         assert numpy.isfinite(expectations).all()
         self.parameters[:] = expectations
@@ -112,8 +111,6 @@ class VarDistHidden(VarDist):
         U{visitor design pattern<http://en.wikipedia.org/wiki/Visitor_pattern>}.
         """
         return visitor.visit_var_dist_hidden(self, *args, **kwargs)
-
-
 
 
 class VarDistGaussian(VarDistHidden):
@@ -129,10 +126,7 @@ class VarDistGaussian(VarDistHidden):
     @assert_result_finite
     def get_expectation(self):
         mu, gamma = FactorGaussian.extract_parameters(self.parameters)
-        return numpy.array([mu, 1./gamma + mu**2])
-
-
-
+        return numpy.array([mu, 1. / gamma + mu**2])
 
 
 class VarDistGamma(VarDistHidden):
@@ -143,19 +137,16 @@ class VarDistGamma(VarDistHidden):
         "@return: The entropy of this variational distribution."
         a, b = FactorGamma.extract_parameters(self.parameters)
         return (
-          a
-          + (1. - a) * scipy.special.digamma(a)
-          - numpy.log(b)
-          + scipy.special.gammaln(a)
+            a
+            + (1. - a) * scipy.special.digamma(a)
+            - numpy.log(b)
+            + scipy.special.gammaln(a)
         )
 
     @assert_result_finite
     def get_expectation(self):
         a, b = FactorGamma.extract_parameters(self.parameters)
-        return numpy.array([a/b, scipy.special.digamma(a) - numpy.log(b)])
-
-
-
+        return numpy.array([a / b, scipy.special.digamma(a) - numpy.log(b)])
 
 
 class VarDistDiscrete(VarDistHidden):
@@ -176,14 +167,8 @@ class VarDistDiscrete(VarDistHidden):
         return self.parameters
 
 
-
-
-
-
 class Variable(object):
     pass
-
-
 
 
 class Factor(object):
@@ -191,7 +176,6 @@ class Factor(object):
         "Connect this factor to its neighbours (i.e. variables)"
         for u in self.neighbours():
             g.add_edge(u, v)
-
 
 
 class FactorGaussian(Factor):
@@ -231,13 +215,13 @@ class FactorGaussian(Factor):
         mu, mu2 = var_dists[self.mu].get_expectation()
         gamma, log_gamma = var_dists[self.gamma].get_expectation()
         return (
-          gamma * mu * x
-          + .5 * (
-            log_gamma
-            - gamma * mu2
-            - FactorGaussian._log_2_pi
-            - gamma * x2
-          )
+            gamma * mu * x
+            + .5 * (
+                log_gamma
+                - gamma * mu2
+                - FactorGaussian._log_2_pi
+                - gamma * x2
+            )
         )
 
     @assert_result_finite
@@ -249,24 +233,25 @@ class FactorGaussian(Factor):
             mu, mu2 = var_dists[self.mu].get_expectation()
             gamma, log_gamma = var_dists[self.gamma].get_expectation()
             return numpy.array([
-              mu * gamma,
-              -.5 * gamma
+                mu * gamma,
+                -.5 * gamma
             ])
         if self.mu == v:
             x, x2 = var_dists[self.x].get_expectation()
             gamma, log_gamma = var_dists[self.gamma].get_expectation()
             return numpy.array([
-              gamma * x,
-              -.5 * gamma
+                gamma * x,
+                -.5 * gamma
             ])
         if self.gamma == v:
             x, x2 = var_dists[self.x].get_expectation()
             mu, mu2 = var_dists[self.mu].get_expectation()
             return numpy.array([
-              mu * x - .5*(x2 + mu2),
-              .5
+                mu * x - .5 * (x2 + mu2),
+                .5
             ])
-        raise RuntimeError('Neighbour, v, not known by factor. Cannot calculate an update for unknown vertex.')
+        raise RuntimeError(
+            'Neighbour, v, not known by factor. Cannot calculate an update for unknown vertex.')
 
     @staticmethod
     def natural_x(x):
@@ -288,12 +273,6 @@ class FactorGaussian(Factor):
         gamma = -2. * parameters[1]
         mu = parameters[0] / gamma
         return mu, gamma
-
-
-
-
-
-
 
 
 class FactorGamma(Factor):
@@ -333,24 +312,25 @@ class FactorGamma(Factor):
             a, log_gamma_a = var_dists[self.a].get_expectation()
             b, log_b = var_dists[self.b].get_expectation()
             return numpy.array([
-              -b,
-              a - 1.
+                -b,
+                a - 1.
             ])
         if self.a == v:
             x, log_x = var_dists[self.x].get_expectation()
             b, log_b = var_dists[self.b].get_expectation()
             return numpy.array([
-              log_b + log_x,
-              -1.
+                log_b + log_x,
+                -1.
             ])
         if self.b == v:
             x, log_x = var_dists[self.x].get_expectation()
             a, log_gamma_a = var_dists[self.a].get_expectation()
             return numpy.array([
-              -x,
-              a
+                -x,
+                a
             ])
-        raise RuntimeError('Neighbour, v, not known by factor. Cannot calculate an update for unknown vertex.')
+        raise RuntimeError(
+            'Neighbour, v, not known by factor. Cannot calculate an update for unknown vertex.')
 
     @assert_result_finite
     def log_likelihood(self, var_dists):
@@ -359,10 +339,10 @@ class FactorGamma(Factor):
         a, log_gamma_a = var_dists[self.a].get_expectation()
         b, log_b = var_dists[self.b].get_expectation()
         return (
-          -b * x
-          + (a - 1.) * log_x
-          + a * log_b
-          - log_gamma_a
+            -b * x
+            + (a - 1.) * log_x
+            + a * log_b
+            - log_gamma_a
         )
 
     @staticmethod
@@ -385,8 +365,6 @@ class FactorGamma(Factor):
         b = -parameters[0]
         a = parameters[1] + 1.
         return a, b
-
-
 
 
 class FactorMixture(Factor):
@@ -430,10 +408,12 @@ class FactorMixture(Factor):
         """
         if self.x == v:
             _lambda = var_dists[self._lambda].get_expectation()
-            y = numpy.array([f.calculate_update_for(v, var_dists) for f in self.factors])
+            y = numpy.array([f.calculate_update_for(v, var_dists)
+                             for f in self.factors])
             return _lambda * y
         if self._lambda == v:
-            log_likelihoods = numpy.array([f.log_likelihood(var_dists) for f in self.factors])
+            log_likelihoods = numpy.array(
+                [f.log_likelihood(var_dists) for f in self.factors])
             #import IPython; IPython.Debugger.Pdb().set_trace()
             return log_likelihoods
         else:
@@ -443,17 +423,16 @@ class FactorMixture(Factor):
                 if v in f.neighbours():
                     # it is a neighbour of this factor
                     return p * f.calculate_update_for(v, var_dists)
-        raise RuntimeError('Neighbour, v, not known by factor. Cannot calculate an update for unknown vertex.')
+        raise RuntimeError(
+            'Neighbour, v, not known by factor. Cannot calculate an update for unknown vertex.')
 
     @assert_result_finite
     def log_likelihood(self, var_dists):
         "@return: The log likelihood of this factor under the variational distribution."
         _lambda = var_dists[self._lambda].get_expectation()
-        log_likelihoods = numpy.array([f.log_likelihood(var_dists) for f in self.factors])
+        log_likelihoods = numpy.array(
+            [f.log_likelihood(var_dists) for f in self.factors])
         return numpy.dot(_lambda, log_likelihoods)
-
-
-
 
 
 class FactorDirichlet(Factor):
@@ -488,9 +467,9 @@ class FactorDirichlet(Factor):
         log_p = var_dists[self.p].get_expectation()
         u, log_gamma_u, log_gamma_U = var_dists[self.u].get_expectation()
         return (
-          numpy.dot(u-1., log_p)
-          + log_gamma_U
-          - log_gamma_u.sum()
+            numpy.dot(u - 1., log_p)
+            + log_gamma_U
+            - log_gamma_u.sum()
         )
 
     @assert_result_finite
@@ -504,7 +483,8 @@ class FactorDirichlet(Factor):
         if self.u == v:
             log_p = var_dists[self.p].get_expectation()
             return log_p
-        raise RuntimeError('Neighbour, v, not known by factor. Cannot calculate an update for unknown vertex.')
+        raise RuntimeError(
+            'Neighbour, v, not known by factor. Cannot calculate an update for unknown vertex.')
 
     @staticmethod
     def natural_p(p):
@@ -515,24 +495,15 @@ class FactorDirichlet(Factor):
     def natural_u(u):
         "Convert from canonical to natural form."
         return (
-          u,
-          scipy.special.gammaln(u),
-          scipy.special.gammaln(u.sum()),
+            u,
+            scipy.special.gammaln(u),
+            scipy.special.gammaln(u.sum()),
         )
-
-
-
-
-
-
-
-
-
-
 
 
 class GraphLabeller(object):
     """A visitor that labels vertices in the graph."""
+
     def __init__(self, g, label_edges=True):
         self.g = g
         self.label_edges = label_edges
@@ -575,8 +546,6 @@ class GraphLabeller(object):
         pass
 
 
-
-
 class VariationalUpdater(object):
 
     _L_check_tolerance = 1.e-8
@@ -595,17 +564,18 @@ class VariationalUpdater(object):
             pre_L = self.L()
         # add up all the incoming updates
         self.var_dists[v].update(
-          sum(
-            self.model.factors[u].calculate_update_for(v, self.var_dists)
-            for u
-            in self.model.g.adjacent_vertices(v)
-          )
+            sum(
+                self.model.factors[u].calculate_update_for(v, self.var_dists)
+                for u
+                in self.model.g.adjacent_vertices(v)
+            )
         )
         # are we checking that the LL increases?
         if __debug__:
             post_L = self.L()
             if pre_L > post_L + VariationalUpdater._L_check_tolerance:
-                raise RuntimeError('L(Q) decreased by %f as result of variational update' % (pre_L-post_L))
+                raise RuntimeError(
+                    'L(Q) decreased by %f as result of variational update' % (pre_L - post_L))
 
     def update_all(self):
         for v in self.model.g.vertices:
@@ -616,23 +586,22 @@ class VariationalUpdater(object):
     def log_likelihood(self):
         "@return: The log likelihood of the factors w.r.t. the variational distribution."
         return sum(
-          self.model.factors[v].log_likelihood(self.var_dists)
-          for v
-          in self.model.factor_vertices()
+            self.model.factors[v].log_likelihood(self.var_dists)
+            for v
+            in self.model.factor_vertices()
         )
 
     def entropy(self):
         "@return: The entropy of the variational distribution."
         return sum(
-          self.var_dists[v].entropy()
-          for v
-          in self.model.variable_vertices()
+            self.var_dists[v].entropy()
+            for v
+            in self.model.variable_vertices()
         )
 
     def L(self):
         "@return: L(Q) = entropy(variational dist.) + log likelihood"
         return self.entropy() + self.log_likelihood()
-
 
 
 if '__main__' == __name__:
@@ -652,14 +621,14 @@ if '__main__' == __name__:
     _lambdas = [factor_graph.add_variable(Variable()) for i in xrange(K)]
     for x, _lambda in zip(xs, _lambdas):
         factor_graph.add_factor(
-          FactorMixture(
-            x,
-            (
-              FactorGaussian(x, mu1, gamma1),
-              FactorGaussian(x, mu2, gamma2)
-            ),
-            _lambda
-          )
+            FactorMixture(
+                x,
+                (
+                    FactorGaussian(x, mu1, gamma1),
+                    FactorGaussian(x, mu2, gamma2)
+                ),
+                _lambda
+            )
         )
 
     #
@@ -678,7 +647,7 @@ if '__main__' == __name__:
     var_dists[xs[4]] = VarDistObserved(FactorGaussian.natural_x(2.1))
     for _lambda in _lambdas:
         var_dists[_lambda] = VarDistDiscrete(K=2)
-        var_dists[_lambda].update(numpy.random.uniform(size=2)+1.)
+        var_dists[_lambda].update(numpy.random.uniform(size=2) + 1.)
 
     #
     # label and draw graph
@@ -697,7 +666,8 @@ if '__main__' == __name__:
     for v in factor_graph.variable_vertices():
         var_dists[v].accept(labeller, v)
     factor_graph.g.write_graphviz('model.dot')
-    os.system('neato -Goverlap=scale -Efontname=arial -Efontsize=8 -Elen=2 -T svg model.dot -o model.svg')
+    os.system(
+        'neato -Goverlap=scale -Efontname=arial -Efontsize=8 -Elen=2 -T svg model.dot -o model.svg')
 
     #
     # Do updates
@@ -714,7 +684,9 @@ if '__main__' == __name__:
         print 'log P(D) >= %f' % L
         for i, _lambda in enumerate(_lambdas):
             print 'lambda_%i: %s' % (i, var_dists[_lambda].parameters)
-        print 'mu1   : expected = %f; precision = %f' % (FactorGaussian.extract_parameters(var_dists[mu1].parameters))
-        print 'mu2   : expected = %f; precision = %f' % (FactorGaussian.extract_parameters(var_dists[mu2].parameters))
+        print 'mu1   : expected = %f; precision = %f' % (
+            FactorGaussian.extract_parameters(var_dists[mu1].parameters))
+        print 'mu2   : expected = %f; precision = %f' % (
+            FactorGaussian.extract_parameters(var_dists[mu2].parameters))
         if convergence_test(L):
             break

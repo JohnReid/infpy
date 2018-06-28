@@ -19,8 +19,8 @@ class DecisionTreeSpecies(object):
     def __init__(
             self,
             context,
-            initial_depth = 3,
-            p_mutation = .1
+            initial_depth=3,
+            p_mutation=.1
     ):
         self.context = context
         self.initial_depth = initial_depth
@@ -45,15 +45,15 @@ class DecisionTreeSpecies(object):
     def prune_individuals(self, pop):
         from random import random
         if random() < .1:
-            check_pruning = False # if true check pruning does not change results on self.data
+            check_pruning = False  # if true check pruning does not change results on self.data
             for i in pop.individuals:
                 if check_pruning:
-                    pre_pruning_outcomes = [ i(x) for x, _y in self.data ]
+                    pre_pruning_outcomes = [i(x) for x, _y in self.data]
                 from copy import deepcopy
                 pre_i = deepcopy(i)
             prune_tree(i)
             if check_pruning:
-                post_pruning_outcomes = [ i(x) for x, _y in self.data ]
+                post_pruning_outcomes = [i(x) for x, _y in self.data]
                 for pre, post in zip(pre_pruning_outcomes, post_pruning_outcomes):
                     if pre != post:
                         print_tree(pre_i)

@@ -11,7 +11,10 @@ first word and the second the second word.
 """
 
 import infpy.dp.hdpm as hdpm
-import pylab as P, numpy, logging, itertools
+import pylab as P
+import numpy
+import logging
+import itertools
 from cookbook import pylab_utils
 from infpy.convergence_test import LlConvergenceTest
 from optparse import OptionParser
@@ -29,6 +32,6 @@ documents = [[i] * N for i in xrange(W)]
 K = 3 * W
 "The maximum number of programs in the model."
 
+
 def create_model():
     return hdpm.HDPM(documents, W, K)
-

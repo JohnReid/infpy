@@ -10,11 +10,10 @@ import boost.graph as bgl
 import os
 
 
-
 def write_graph(g, graph_name):
     g.write_graphviz('%s.dot' % graph_name)
-    os.system('neato -Goverlap=scale -Elen=2 -T svg %s.dot -o %s.svg' % (graph_name, graph_name))
-
+    os.system('neato -Goverlap=scale -Elen=2 -T svg %s.dot -o %s.svg' %
+              (graph_name, graph_name))
 
 
 def copy_graph_structure(g):
@@ -28,17 +27,16 @@ def copy_graph_structure(g):
     copy = bgl.Graph()
     copy2g = copy.add_vertex_property(type='vertex')
     g2copy = g.add_vertex_property(type='vertex')
-    for v in g.vertices: # add the vertices
+    for v in g.vertices:  # add the vertices
         u = copy.add_vertex()
         copy2g[u] = v
         g2copy[v] = u
-    for e in g.edges: # add the edges
+    for e in g.edges:  # add the edges
         copy.add_edge(
-          g2copy[g.source(e)],
-          g2copy[g.target(e)]
+            g2copy[g.source(e)],
+            g2copy[g.target(e)]
         )
     return copy, g2copy, copy2g
-
 
 
 def maximum_cardinality_search(g):
@@ -47,8 +45,6 @@ def maximum_cardinality_search(g):
     triangulation.
     """
     return max((g.in_degree(v), v) for v in g.vertices)[1]
-
-
 
 
 def minimum_deficiency_search(g):
@@ -71,7 +67,6 @@ def minimum_deficiency_search(g):
     return min((induced_neighbour_metric(g, v), v) for v in g.vertices)[1]
 
 
-
 def edges_to_triangulate(g):
     """
     Triangulate a graph such that is it chordal,
@@ -89,7 +84,7 @@ def edges_to_triangulate(g):
         for u1 in copy.adjacent_vertices(v):
             for u2 in copy.adjacent_vertices(v):
                 if u1 != u2:
-                    if None == copy.edge(u1, u2): # if no edge
+                    if None == copy.edge(u1, u2):  # if no edge
                         # add an edge
                         copy.add_edge(u1, u2)
                         yield (copy2g[u1], copy2g[u2])
@@ -105,8 +100,6 @@ def triangulate(g):
         yield g.add_edge(u, v)
 
 
-
-
 def test_triangulation():
     g = bgl.Graph()
     labels = g.add_vertex_property(name='label', type='string')
@@ -114,19 +107,15 @@ def test_triangulation():
     vs = [g.add_vertex() for i in xrange(5)]
     for i, v in enumerate(vs):
         labels[v] = '%d' % i
-    g.add_edge(vs[0],vs[1])
-    g.add_edge(vs[0],vs[3])
-    g.add_edge(vs[1],vs[2])
-    g.add_edge(vs[2],vs[3])
-    g.add_edge(vs[3],vs[4])
+    g.add_edge(vs[0], vs[1])
+    g.add_edge(vs[0], vs[3])
+    g.add_edge(vs[1], vs[2])
+    g.add_edge(vs[2], vs[3])
+    g.add_edge(vs[3], vs[4])
     write_graph(g, triangulation_before)
     for e in triangulate(g):
         styles[e] = 'dashed'
     write_graph(g, triangulation_after)
-
-
-
-
 
 
 def enumerate_maximal_cliques(g):
@@ -140,11 +129,13 @@ def enumerate_maximal_cliques(g):
     @return: Yields sets of vertices, each of which forms a maximal clique.
     """
     Q = set()
+
     def expand(SUBG, CAND):
         if not SUBG:
             yield Q
         else:
-            u = max((len(CAND.intersection(g.adjacent_vertices(u))), u) for u in SUBG)[1]
+            u = max((len(CAND.intersection(g.adjacent_vertices(u))), u)
+                    for u in SUBG)[1]
             EXTu = CAND.difference(g.adjacent_vertices(u))
             while EXTu:
                 q = EXTu.pop()
@@ -157,9 +148,6 @@ def enumerate_maximal_cliques(g):
                 Q.remove(q)
     for C in expand(set(g.vertices), set(g.vertices)):
         yield C
-
-
-
 
 
 def construct_junction_tree(cliques):
@@ -187,10 +175,9 @@ def construct_junction_tree(cliques):
     return g, clusters, separators
 
 
-
-
 class Factor(object):
     "A factor in a factor graph."
+
     def __init__(self, neighbours):
         self.neighbours = list(neighbours)
 
@@ -200,9 +187,6 @@ class Factor(object):
         U{visitor design pattern<http://en.wikipedia.org/wiki/Visitor_pattern>}.
         """
         return visitor.visit_factor(self, *args, **kwargs)
-
-
-
 
 
 class Variable(object):
@@ -217,9 +201,6 @@ class Variable(object):
         U{visitor design pattern<http://en.wikipedia.org/wiki/Visitor_pattern>}.
         """
         return visitor.visit_variable(self, *args, **kwargs)
-
-
-
 
 
 class FactorGraph(object):
@@ -270,10 +251,9 @@ class FactorGraph(object):
         return var_g, var_map
 
 
-
-
 class GraphLabeller(object):
     """A visitor that labels vertices in the graph."""
+
     def __init__(self, g):
         self.g = g
         self.labels = g.add_vertex_property(name='label', type='string')
@@ -290,9 +270,6 @@ class GraphLabeller(object):
     def visit_variable(self, variable, v):
         self.shapes[v] = "circle"
         self.labels[v] = variable.name
-
-
-
 
 
 def winn_fig_52_model():
@@ -315,7 +292,6 @@ def winn_fig_52_model():
     model.add_factor(Factor([D, F, E]))
 
     return model
-
 
 
 def winn_fig_53_model():
@@ -341,7 +317,6 @@ def winn_fig_53_model():
     return model
 
 
-
 def gatsby_lect5_model():
     "A factor graph for the factor graph in the handout for lecture 5 of the Gatsby course."
     model = FactorGraph()
@@ -362,7 +337,6 @@ def gatsby_lect5_model():
     model.add_factor(Factor([D]))
 
     return model
-
 
 
 def asia_chest_clinic_model():
@@ -390,7 +364,7 @@ def asia_chest_clinic_model():
 
 
 if '__main__' == __name__:
-    #test_triangulation()
+    # test_triangulation()
 
     #model = asia_chest_clinic_model()
     #model = winn_fig_52_model()
@@ -403,8 +377,6 @@ if '__main__' == __name__:
     for v in model.g.vertices:
         model.nodes[v].accept(labeller, v)
     write_graph(model.g, "svmp_model")
-
-
 
     #
     # Drop the factors and get a graph just of the variables
@@ -422,22 +394,24 @@ if '__main__' == __name__:
         labeller.edge_styles[e] = 'dashed'
     write_graph(var_g, "triangulated_graph")
 
-
     #
     # Find the maximal cliques
     #
     for clique in enumerate_maximal_cliques(var_g):
         print ", ".join(labeller.labels[v] for v in clique)
 
-
     #
     # Construct a junction tree
     #
-    junction_tree, clusters, separators = construct_junction_tree(enumerate_maximal_cliques(var_g))
-    cluster_labels = junction_tree.add_vertex_property(name='label', type='string')
-    separator_labels = junction_tree.add_edge_property(name='label', type='string')
+    junction_tree, clusters, separators = construct_junction_tree(
+        enumerate_maximal_cliques(var_g))
+    cluster_labels = junction_tree.add_vertex_property(
+        name='label', type='string')
+    separator_labels = junction_tree.add_edge_property(
+        name='label', type='string')
     for v in junction_tree.vertices:
         cluster_labels[v] = ":".join(labeller.labels[u] for u in clusters[v])
     for e in junction_tree.edges:
-        separator_labels[e] = ":".join(labeller.labels[u] for u in separators[e])
+        separator_labels[e] = ":".join(labeller.labels[u]
+                                       for u in separators[e])
     write_graph(junction_tree, "junction_tree")

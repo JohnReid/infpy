@@ -88,7 +88,7 @@ class CRP(object):
                 p[t] = m[t] * tablelikelihoodfn(n, t)
         p[T] = self.alpha * tablelikelihoodfn(n, -1)
         # Choose a table to sit at
-        t = npy.random.choice(range(T + 1), p=p/p.sum())
+        t = npy.random.choice(range(T + 1), p=p / p.sum())
         # _logger.debug('sampletable(): choice = %d; weights = %s', t, p)
         # If we chose a new table, we must create it unless we can
         # reuse an old empty one
@@ -461,9 +461,9 @@ if '__main__' == __name__:
     F = exp.GaussianConjugatePrior()
     # Use two contexts with same exponential family
     x = [
-        npy.array([0,  0,  0,  1,  1,  1]),
-        npy.array([0,  0,  1,  1, -1, -1]),
-        ]
+        npy.array([0, 0, 0, 1, 1, 1]),
+        npy.array([0, 0, 1, 1, -1, -1]),
+    ]
     T = map(F.likelihood.T, x)  # Convert to exponential family suff. stats
     alpha = 1.
     beta = 1.

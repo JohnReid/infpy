@@ -8,8 +8,12 @@ Create artificial test data from a HDPM.
 """
 
 from infinite_multinomials import LazyInfiniteSequence, StickBreaker, InfiniteDirichlet, plot_multinomials
-import numpy as N, numpy.random as R, itertools, cookbook.pylab_utils as pylab_utils
-import pylab as P, logging
+import numpy as N
+import numpy.random as R
+import itertools
+import cookbook.pylab_utils as pylab_utils
+import pylab as P
+import logging
 
 
 def seed(s):
@@ -23,7 +27,8 @@ def rGamma(alpha, beta):
     from rpy2.robjects import r
     x = r.rgamma(1, alpha, beta)
     if N.isnan(x):
-        raise RuntimeError('Cannot draw from gamma distribution with parameters: (%f, %f)' % (alpha, beta))
+        raise RuntimeError(
+            'Cannot draw from gamma distribution with parameters: (%f, %f)' % (alpha, beta))
     return x[0]
 
 
@@ -52,7 +57,7 @@ class HDPMSampler(object):
         self,
         document_sizes,
         a_alpha, b_alpha,
-        a_beta,  b_beta,
+        a_beta, b_beta,
         a_gamma, b_gamma,
         a_tau
     ):
@@ -91,7 +96,7 @@ class HDPMSampler(object):
     def sample_parameters(self):
         "Sample parameters."
         self.alpha = rGamma(self.a_alpha, self.b_alpha)
-        self.beta  = rGamma(self.a_beta,  self.b_beta )
+        self.beta  = rGamma(self.a_beta, self.b_beta)
         self.gamma = rGamma(self.a_gamma, self.b_gamma)
         self.tau = rDirichlet(self.a_tau)
         self.pi = StickBreaker(self.gamma)
@@ -115,10 +120,9 @@ class HDPMSampler(object):
     def sample_data(self):
         "Sample data points."
         self.documents = [self.sample_document(d) for d in xrange(self.D())]
-    
+
     def get_documents(self):
         return [X for theta, Z, X in self.documents]
-
 
 
 def summarise_sample(sampler):
@@ -134,11 +138,12 @@ def summarise_sample(sampler):
     #
     P.figure()
     plot_multinomials(
-        list(itertools.chain((sampler.pi,), [t for t, Z, X in sampler.documents])),
+        list(itertools.chain((sampler.pi,), [
+             t for t, Z, X in sampler.documents])),
         itertools.imap(
             lambda c, i: {
-                'color':c,
-                'label':i and 'theta[%d]' % (i-1) or 'pi'
+                'color': c,
+                'label': i and 'theta[%d]' % (i - 1) or 'pi'
             },
             itertools.cycle(pylab_utils.simple_colours),
             itertools.count()
@@ -156,10 +161,9 @@ def summarise_sample(sampler):
     W = sampler.W()
     width = (1. - spacing) / K
     for k, program in enumerate(sampler.programs):
-        P.bar(N.arange(W) + (-width*K/2 + k*width), program, width)
+        P.bar(N.arange(W) + (-width * K / 2 + k * width), program, width)
     P.legend()
     P.title('Programs')
-
 
 
 if '__main__' == __name__:
@@ -169,7 +173,7 @@ if '__main__' == __name__:
     seed(2)
     W = 6
     sampler = HDPMSampler(
-        N.arange(5)+10,
+        N.arange(5) + 10,
         10., 20.,
         20., 10.,
         20., 10.,

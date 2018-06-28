@@ -12,5 +12,5 @@ eval $(update-env \
 )
 
 # Activate virtualenv
-. $PROJECTDIR/virtualenv/bin/activate
+. $PROJECTDIR/venv3/bin/activate
 

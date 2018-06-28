@@ -7,7 +7,8 @@ Code to implement ROC point/curve calculation and plotting.
 """
 
 
-import math, numpy as N
+import math
+import numpy as N
 from itertools import chain, groupby
 import logging
 import warnings
@@ -35,18 +36,15 @@ class RocCalculator(object):
         self.fn = fn
         "Number of false negatives."
 
-
     @property
     def total_positive(self):
         "The total number of positive test cases."
         return self.tp + self.fn
 
-
     @property
     def total_negative(self):
         "The total number of negative test cases."
         return self.tn + self.fp
-
 
     def __cmp__(self, other):
         "Comparison."
@@ -64,21 +62,22 @@ class RocCalculator(object):
             else:
                 return 0
 
-
     def distance(self, other):
         "Measure of distance between points."
-        return (self.sensitivity()-other.sensitivity()) * (other.specificity()-self.specificity())
-
+        return (self.sensitivity() - other.sensitivity()) * (other.specificity() - self.specificity())
 
     def __call__(self, truth, prediction):
         "Updates this ROC calculator with one truth/prediction pair"
         if prediction:
-            if truth: self.tp += 1
-            else: self.fp += 1
+            if truth:
+                self.tp += 1
+            else:
+                self.fp += 1
         else:
-            if truth: self.fn += 1
-            else: self.tn += 1
-
+            if truth:
+                self.fn += 1
+            else:
+                self.tn += 1
 
     def __add__(self, rhs):
         "Add this RocCalculator to another and return the result."
@@ -89,15 +88,13 @@ class RocCalculator(object):
         result.fn = self.fn + rhs.fn
         return result
 
-
     def normalise(self, rhs):
         "Normalise this RocCalculator so that tp+tn+fp+fn=1."
-        sum = float(self.tp+self.tn+self.fp+self.fn)
+        sum = float(self.tp + self.tn + self.fp + self.fn)
         self.tp /= sum
         self.tn /= sum
         self.fp /= sum
         self.fn /= sum
-
 
     @staticmethod
     def always_predict_true():
@@ -107,7 +104,6 @@ class RocCalculator(object):
         result.tn = result.fn = 0
         return result
 
-
     @staticmethod
     def always_predict_false():
         "A RocCalculator for a predictor that always predicts False"
@@ -116,47 +112,42 @@ class RocCalculator(object):
         result.tn = result.fn = 1
         return result
 
-
     def sensitivity(self):
         "TP/(TP+FN)"
         denominator = self.tp + self.fn
         if denominator:
-            return float(self.tp)/denominator
+            return float(self.tp) / denominator
         else:
             return 1.0
     true_positive_rate = tpr = hit_rate = recall = sensitivity
-
 
     def specificity(self):
         "TN/(TN+FP)"
         denominator = self.tn + self.fp
         if denominator:
-            return float(self.tn)/denominator
+            return float(self.tn) / denominator
         else:
             return 1.0
-
 
     def false_positive_rate(self):
         "FP/(TN+FP)"
         return 1.0 - self.specificity()
     fpr = false_positive_rate
 
-
     def positive_predictive_value(self):
         "TP/(TP+FP)"
         denominator = self.tp + self.fp
         if denominator:
-            return float(self.tp)/denominator
+            return float(self.tp) / denominator
         else:
             return 1.0
     precision = positive_predictive_value
-
 
     def negative_predictive_value(self):
         "TN/(TN+FN)"
         denominator = self.tn + self.fn
         if denominator:
-            return float(self.tn)/denominator
+            return float(self.tn) / denominator
         else:
             return 1.0
 
@@ -164,37 +155,34 @@ class RocCalculator(object):
         "TP/(TP+FN+FP) see: Pevzner & Sve"
         denominator = self.tp + self.fn + self.fp
         if denominator:
-            return float(self.tp)/denominator
+            return float(self.tp) / denominator
         else:
             return 1.0
-
 
     def accuracy(self):
         "(TP+TN)/(TP+TN+FP+FN)"
         denominator = self.tp + self.tn + self.fn + self.fp
         if denominator:
-            return float(self.tp+self.tn)/denominator
+            return float(self.tp + self.tn) / denominator
         else:
             return 1.0
-
 
     def average_performance(self):
         "(sensitivity()+positive_predictive_value())/2"
         return (self.sensitivity() + self.positive_predictive_value()) / 2.
 
-
     def correlation_coefficient(self):
         "(TP.TN-FN.FP)/sqrt((TP+FN)(TN+FP)(TP+FP)(TN+FN)) see: Burset & Guigo"
-        denominator = math.sqrt((self.tp+self.fn)*(self.tn+self.fn)*(self.tp+self.fp)*(self.tn+self.fp))
-        numerator = self.tp*self.tn-self.fn*self.fp
+        denominator = math.sqrt(
+            (self.tp + self.fn) * (self.tn + self.fn) * (self.tp + self.fp) * (self.tn + self.fp))
+        numerator = self.tp * self.tn - self.fn * self.fp
         if denominator:
-            return numerator/denominator
+            return numerator / denominator
         else:
             if 0.0 == numerator:
                 return 0.0
             else:
                 return 1.0
-
 
     def __str__(self):
         return '''TP: %d; FP: %d; TN: %d; FN: %d
@@ -203,12 +191,12 @@ specificity:               %.3f    TN/(TN+FP)
 positive predictive value: %.3f    TP/(TP+FP)
 performance coefficient:   %.3f    TP/(TP+FN+FP)
 correlation coefficient:   %.3f    (TP.TN-FN.FP)/sqrt((TP+FN)(TN+FP)(TP+FP)(TN+FN))''' % (
-self.tp, self.fp, self.tn, self.fn,
-                self.sensitivity(),
-                self.specificity(),
-                self.positive_predictive_value(),
-                self.performance_coefficient(),
-                self.correlation_coefficient(),
+            self.tp, self.fp, self.tn, self.fn,
+            self.sensitivity(),
+            self.specificity(),
+            self.positive_predictive_value(),
+            self.performance_coefficient(),
+            self.correlation_coefficient(),
         )
 
 
@@ -230,9 +218,10 @@ def get_new_roc_parameter(rocs, for_specificity=True):
     rocs.sort()
     statistic = for_specificity and RocCalculator.specificity or RocCalculator.sensitivity
     diffs = [
-      (abs(statistic(rocs[i][1])-statistic(rocs[i+1][1])), (rocs[i][0]+rocs[i+1][0])/2)
-      for i
-      in xrange(len(rocs)-1)
+        (abs(statistic(rocs[i][1]) - statistic(rocs[i + 1][1])),
+         (rocs[i][0] + rocs[i + 1][0]) / 2)
+        for i
+        in xrange(len(rocs) - 1)
     ]
     return max(diffs)[1]
 
@@ -243,7 +232,8 @@ def generate_roc_points(rocs, sort_negative_first=True):
     threshold if asked to.
     This gives a step-function like ROC curve rather than a smoothed curve.
     """
-    warnings.warn('DEPRECATED: use infpy.roc.all_rocs_from_thresholds()', DeprecationWarning)
+    warnings.warn(
+        'DEPRECATED: use infpy.roc.all_rocs_from_thresholds()', DeprecationWarning)
     last = RocCalculator.always_predict_false()
     yield last
     for roc in chain(rocs, (RocCalculator.always_predict_true(),)):
@@ -263,7 +253,8 @@ def plot_roc_points(rocs, **plot_kwds):
     :param plot_kwds: All extra keyword arguments are passed to the pylab.plot call.
     :returns: The result of pylab.plot call.
     """
-    warnings.warn('DEPRECATED: use infpy.roc.plot_rocpoints()', DeprecationWarning)
+    warnings.warn('DEPRECATED: use infpy.roc.plot_rocpoints()',
+                  DeprecationWarning)
     from pylab import plot
     extended_rocs = list(generate_roc_points(rocs))
     tprs = map(RocCalculator.tpr, extended_rocs)
@@ -297,7 +288,7 @@ def plot_precision_versus_recall(rocs, **plot_kwds):
     """
     from pylab import plot
     points = [(roc.recall(), roc.precision()) for roc in rocs]
-    #points.sort()
+    # points.sort()
     return plot(
         [recall for recall, precision in points],
         [precision for recall, precision in points],
@@ -315,7 +306,7 @@ def plot_precision_recall(roc_thresholds, recall_plot_kwds={}, precision_plot_kw
     :param plot_fn: Function used to plot. Use pylab.semilogx for log scale threshold axis.
     :returns: The result of 2 pylab.plot calls as a tuple (recall, precision).
     """
-    if None == plot_fn:
+    if plot_fn is None:
         from pylab import plot
         plot_fn = plot
     if 'label' not in recall_plot_kwds:
@@ -352,7 +343,7 @@ def auc(rocpoints):
     for point in rocpoints:
         try:
             sum += ((point.tpr() + last.tpr())
-                / 2 * abs(last.fpr() - point.fpr()))
+                    / 2 * abs(last.fpr() - point.fpr()))
         except AttributeError:
             pass
         last = point
@@ -381,8 +372,8 @@ def area_under_curve(rocs, include_0_0=True, include_1_1=True):
     last_x, last_y = None, None
     area = 0.
     for x, y in zip(x_axis, y_axis):
-        if last_x != None: # if not first point
-            area += (x-last_x) * (y+last_y) / 2
+        if last_x is not None:  # if not first point
+            area += (x - last_x) * (y + last_y) / 2
         last_x, last_y = x, y
     return area
 
@@ -395,8 +386,8 @@ def plot_random_classifier(**kwargs):
     if 'linestyle' not in kwargs:
         kwargs['linestyle'] = ':'
     plot(
-        [0,1],
-        [0,1],
+        [0, 1],
+        [0, 1],
         **kwargs
     )
 
@@ -459,7 +450,8 @@ def rocs_from_thresholds(positive_thresholds, negative_thresholds, num_points=32
 
     :returns: A list of ROC points.
     """
-    warnings.warn('DEPRECATED: use infpy.roc.all_rocs_from_thresholds()', DeprecationWarning)
+    warnings.warn(
+        'DEPRECATED: use infpy.roc.all_rocs_from_thresholds()', DeprecationWarning)
     min_threshold = min(positive_thresholds[0], negative_thresholds[0])
     max_threshold = max(positive_thresholds[-1], negative_thresholds[-1])
     rocs = map(
@@ -484,7 +476,7 @@ def pick_roc_thresholds(roc_for_threshold_fn, min_threshold, max_threshold, num_
         "Compare 2 ROC points to see how far apart they are."
         rp1, t1 = x1
         rp2, t2 = x2
-        return (rp1.distance(rp2), (t1+t2)/2.)
+        return (rp1.distance(rp2), (t1 + t2) / 2.)
 
     rocs = []
     add_threshold(min_threshold)
@@ -492,7 +484,8 @@ def pick_roc_thresholds(roc_for_threshold_fn, min_threshold, max_threshold, num_
 
     while(len(rocs) < num_points):
         # find best new threshold
-        biggest_distance, new_threshold = max(map(compare_2_points, rocs[:-1], rocs[1:]))
+        biggest_distance, new_threshold = max(
+            map(compare_2_points, rocs[:-1], rocs[1:]))
         add_threshold(new_threshold)
 
     return rocs
@@ -505,7 +498,8 @@ def create_rocs_from_thresholds(positive_thresholds, negative_thresholds, num_po
 
     :returns: A list of tuples (ROC point, threshold).
     """
-    warnings.warn('DEPRECATED: use infpy.roc.all_rocs_from_thresholds()', DeprecationWarning)
+    warnings.warn(
+        'DEPRECATED: use infpy.roc.all_rocs_from_thresholds()', DeprecationWarning)
     return pick_roc_thresholds(
         make_roc_from_threshold_fn(positive_thresholds, negative_thresholds),
         min_threshold=min(positive_thresholds[0], negative_thresholds[0]),
@@ -521,7 +515,8 @@ def picked_rocs_from_thresholds(positive_thresholds, negative_thresholds, num_po
 
     :returns: A list of ROC points.
     """
-    warnings.warn('DEPRECATED: use infpy.roc.all_rocs_from_thresholds()', DeprecationWarning)
+    warnings.warn(
+        'DEPRECATED: use infpy.roc.all_rocs_from_thresholds()', DeprecationWarning)
     return [roc for roc, t in create_rocs_from_thresholds(positive_thresholds, negative_thresholds, num_points=num_points)]
 
 
@@ -562,7 +557,9 @@ def all_rocs_from_thresholds(
     # Iterate through the merged thresholds.
     #
     if not negative_first:
-        keyfn = lambda x: x[0] # just group by threshold not positive/negative
+        # just group by threshold not positive/negative
+        def keyfn(x):
+            return x[0]
     else:
         keyfn = None
     for key, group in groupby(
@@ -584,7 +581,7 @@ def all_rocs_from_thresholds(
         # Yield the ROC point for this group
         #
         yield RocCalculator(tp, fp,
-                            total_negative-fp, total_positive-tp)
+                            total_negative - fp, total_positive - tp)
 
     # everything should be classified as false after seeing all the thresholds
     assert tp == 0
@@ -597,7 +594,8 @@ def resize_negative_examples(positive_thresholds, negative_thresholds, num_negat
     The positive thresholds are trimmed accordingly.
     """
     if num_negative > len(negative_thresholds):
-        raise RuntimeError('Not enough negative examples (%d). Requested %d' % (len(negative_thresholds), num_negative))
+        raise RuntimeError('Not enough negative examples (%d). Requested %d' % (
+            len(negative_thresholds), num_negative))
     import bisect
     negative_thresholds = negative_thresholds[-num_negative:]
     threshold = negative_thresholds[0]
@@ -610,9 +608,11 @@ def auc50_wrong(positive_thresholds, negative_thresholds, num_negative=50, num_p
     """
     Calculate the AUC50 as in Gribskov & Robinson 'Use of ROC analysis to evaluate sequence pattern matching'
     """
-    warnings.warn('DEPRECATED: use infpy.roc.auc50_from_rocpoints()', DeprecationWarning)
+    warnings.warn(
+        'DEPRECATED: use infpy.roc.auc50_from_rocpoints()', DeprecationWarning)
     if num_negative > len(negative_thresholds):
-        raise RuntimeError('Not enough negative examples (%d). Requested %d' % (len(negative_thresholds), num_negative))
+        raise RuntimeError('Not enough negative examples (%d). Requested %d' % (
+            len(negative_thresholds), num_negative))
     threshold = negative_thresholds[-num_negative]
     roc_thresholds = pick_roc_thresholds(
         make_roc_from_threshold_fn(positive_thresholds, negative_thresholds),
@@ -620,24 +620,28 @@ def auc50_wrong(positive_thresholds, negative_thresholds, num_negative=50, num_p
         max_threshold=max(positive_thresholds[-1], negative_thresholds[-1]),
         num_points=num_points
     )
-    auc50 = area_under_curve([roc for roc, t in roc_thresholds], include_1_1=False)
+    auc50 = area_under_curve(
+        [roc for roc, t in roc_thresholds], include_1_1=False)
     return auc50, roc_thresholds
 
 
 def auc50(
-    positive_thresholds,
-    negative_thresholds,
-    num_negative=50,
-    num_points=32):
+        positive_thresholds,
+        negative_thresholds,
+        num_negative=50,
+        num_points=32):
     """
     Calculate the AUC50 as in Gribskov & Robinson:
     'Use of ROC analysis to evaluate sequence pattern matching'
     """
-    warnings.warn('DEPRECATED: use infpy.roc.auc50_from_rocpoints()', DeprecationWarning)
+    warnings.warn(
+        'DEPRECATED: use infpy.roc.auc50_from_rocpoints()', DeprecationWarning)
     if num_negative > len(negative_thresholds):
-        raise RuntimeError('Not enough negative examples (%d). Requested %d' % (len(negative_thresholds), num_negative))
+        raise RuntimeError('Not enough negative examples (%d). Requested %d' % (
+            len(negative_thresholds), num_negative))
     roc_thresholds = pick_roc_thresholds(
-        make_roc_from_threshold_fn(positive_thresholds, negative_thresholds[-num_negative:]),
+        make_roc_from_threshold_fn(
+            positive_thresholds, negative_thresholds[-num_negative:]),
         min_threshold=min(positive_thresholds[0], negative_thresholds[0]),
         max_threshold=max(positive_thresholds[-1], negative_thresholds[-1]),
         num_points=num_points
@@ -668,7 +672,8 @@ def bisect_rocs(rocpoints, predicate, start=0, end=None):
     if end is None:
         end = len(rocpoints)
     if end <= start:
-        raise ValueError('Start (%d) must be less than end (%d).' % (start, end))
+        raise ValueError(
+            'Start (%d) must be less than end (%d).' % (start, end))
     new_index = (start + end) / 2
     if start == new_index:
         return end  # We narrowed down the range completely
@@ -708,8 +713,8 @@ def restrict_false_positives(rocpoints, max_fp=50):
 
 
 def auc50_from_rocpoints(
-    rocpoints,
-    max_fp=50):
+        rocpoints,
+        max_fp=50):
     """
     Calculate the AUC50 as in Gribskov & Robinson:
     'Use of ROC analysis to evaluate sequence pattern matching'
@@ -718,7 +723,8 @@ def auc50_from_rocpoints(
 
 
 if '__main__' == __name__:
-    import numpy.random as R, pylab as P
+    import numpy.random as R
+    import pylab as P
 
     def check_points(points):
         # check increasing in fpr and tpr
@@ -733,7 +739,7 @@ if '__main__' == __name__:
             last = point
 
         # check endpoints
-        assert 1 == points[ 0].fpr() == points[ 0].tpr()
+        assert 1 == points[0].fpr() == points[0].tpr()
         assert 0 == points[-1].fpr() == points[-1].tpr()
 
     P.close('all')
@@ -797,23 +803,23 @@ if '__main__' == __name__:
         label = 'method %d' % method
         logging.info(
             '%s: Got %4d ROC points, AUC=%.3f, AUC50=%.3f',
-            label, 
-            len(points), 
-            auc(points), 
+            label,
+            len(points),
+            auc(points),
             auc50_from_rocpoints(points[::-1]))
         plot_rocpoints(points, label=label, color=color)
         restricted_points = list(restrict_false_positives(points[::-1]))
         plot_rocpoints(
-            restricted_points, 
+            restricted_points,
             label=None,
             fillargs={
-                'alpha' : 0.3,
-                #'hatch' : hatches[idx],
-                'edgecolor' : (0,0,0,0),
-                'facecolor' : color,
-                #'facecolor' : (0,0,0,0),
+                'alpha': 0.3,
+                # 'hatch' : hatches[idx],
+                'edgecolor': (0, 0, 0, 0),
+                'facecolor': color,
+                # 'facecolor' : (0,0,0,0),
             },
-            color=(0,0,0,0),
+            color=(0, 0, 0, 0),
         )
     P.legend(loc='lower right')
     label_plot()
@@ -821,5 +827,3 @@ if '__main__' == __name__:
     P.savefig('output/ROC.png')
     P.savefig('output/ROC.pdf')
     P.close('all')
-
-

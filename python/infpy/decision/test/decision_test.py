@@ -5,10 +5,10 @@
 
 import unittest
 
-class DecisionTest( unittest.TestCase ):
+
+class DecisionTest(unittest.TestCase):
     """Test case for decision trees"""
     pass
-
 
 
 if __name__ == "__main__":

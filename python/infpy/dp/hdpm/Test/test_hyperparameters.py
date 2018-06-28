@@ -30,7 +30,8 @@ numpy.random.seed(options.seed)
 #
 # Now manipulate hyperparameters of HDPM so that it explains data using one topic
 #
-logging.info('Trying hyperparameters that should make HDPM explain data using one topic.')
+logging.info(
+    'Trying hyperparameters that should make HDPM explain data using one topic.')
 
 #
 # If alpha is large, then all the documents are more likely to have similar topic distributions
@@ -38,16 +39,17 @@ logging.info('Trying hyperparameters that should make HDPM explain data using on
 # If gamma is small then we should have few partitions
 # If a_tau is large then tau should be very similar to it
 #
-a_alpha, b_alpha = 10. , .1
-a_beta , b_beta  = 10., .1 # beta  should be large to encourage all the topics to have similar word distributions
-a_gamma, b_gamma = .1, 10. # gamma should be small in order to encourage few partitions
+a_alpha, b_alpha = 10., .1
+# beta  should be large to encourage all the topics to have similar word distributions
+a_beta, b_beta  = 10., .1
+a_gamma, b_gamma = .1, 10.  # gamma should be small in order to encourage few partitions
 a_tau = numpy.ones(W) * 1e2
 
 for model_idx in xrange(options.num_models_to_test):
     model = hdpm.HDPM(
         documents, W, K,
         a_alpha, b_alpha,
-        a_beta , b_beta ,
+        a_beta, b_beta,
         a_gamma, b_gamma,
         a_tau
     )

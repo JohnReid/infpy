@@ -3,4 +3,4 @@
 #
 
 import numpy
-_dtype = numpy.float64 # the data type we use in numpy operations
+_dtype = numpy.float64  # the data type we use in numpy operations

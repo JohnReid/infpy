@@ -84,7 +84,6 @@ _log_2_pi = log(2 * pi)
 
 
 def log_multivariate_gamma(p, a):
-
     """ The logarithm of the `multivariate gamma
     function<http://en.wikipedia.org/wiki/Multivariate_gamma_function>`_ """
 

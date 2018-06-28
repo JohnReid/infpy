@@ -180,7 +180,7 @@ class CheckExpFamily(object):
             # self.family.exp_T,
             # eta,
             # text=str(self.family.__class__)
-            #)
+            # )
 
             # check the expectation of the sufficient statistic by sampling
             exp_T = self.family.sample(eta, size).sum(axis=0) / size
@@ -342,7 +342,6 @@ class CheckConjugatePrior(object):
             )
 
     def check_log_normalisation_factor_expectation(self, sample_size=1000):
-
         """ Test that we get close to the same expectation of the mvn
         normalisation factor from sampling from a normal wishart that we do
         from calculation of our formula.  """
@@ -403,7 +402,6 @@ class MvnConjPriorTests(unittest.TestCase):
     """
 
     def test_expectations_by_sampling(self, sample_size=1000):
-
         """ Test that we get close to the same expectation of the mvn
         normalisation factor from sampling from a normal wishart that we do
         from calculation of our formula.  """

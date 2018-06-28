@@ -32,9 +32,10 @@ for model_idx in xrange(options.num_models_to_test):
     # Check we explained the data using a small number of topics.
     # We want the number of words explained by the first W topics to be at least 99% of all the words.
     if model.counts.E_n_dk.sum(axis=0)[:W].sum() >= .99 * model.N:
-        logging.info('Found a model that could explain the corpus using two topics.')
+        logging.info(
+            'Found a model that could explain the corpus using two topics.')
         summarise_model(model, LL)
         break
 else:
-    raise RuntimeError('Could not infer model that explained the corpus using two topics.')
-
+    raise RuntimeError(
+        'Could not infer model that explained the corpus using two topics.')

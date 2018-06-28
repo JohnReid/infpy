@@ -6,7 +6,8 @@
 from kernel import *
 import numpy
 
-class PreCalculatedKernel( Kernel ):
+
+class PreCalculatedKernel(Kernel):
     """A kernel that has been pre-computed"""
 
     def __init__(
@@ -18,27 +19,28 @@ class PreCalculatedKernel( Kernel ):
         matrix: The kernel values
         """
         self.objects = objects
-        self.matrix = numpy.array( matrix, copy = True )
-        if len( self.matrix.shape ) != 2:
-            raise RuntimeError( 'Kernel must be of rank 2' )
+        self.matrix = numpy.array(matrix, copy=True)
+        if len(self.matrix.shape) != 2:
+            raise RuntimeError('Kernel must be of rank 2')
         if self.matrix.shape[0] != self.matrix.shape[1]:
-            raise RuntimeError( 'Kernel must be square' )
-        if self.matrix.shape[0] != len( objects ):
-            raise RuntimeError( 'Kernel must be of same size as objects' )
+            raise RuntimeError('Kernel must be square')
+        if self.matrix.shape[0] != len(objects):
+            raise RuntimeError('Kernel must be of same size as objects')
         self.indices = dict(
-                [
-                        ( o, i )
-                        for i, o in enumerate( objects )
-                ]
+            [
+                (o, i)
+                for i, o in enumerate(objects)
+            ]
         )
-        Kernel.__init__( self, [], [] )
+        Kernel.__init__(self, [], [])
 
-    def __str__( self ):
+    def __str__(self):
         return """PreCalculatedKernel"""
 
-    def __call__( self, x1, x2, identical = False ):
-        if identical and x1 != x2: raise RuntimeError( 'x1 and x2 should be identical' )
+    def __call__(self, x1, x2, identical=False):
+        if identical and x1 != x2:
+            raise RuntimeError('x1 and x2 should be identical')
         return self.matrix[
-                self.indices[ x1 ],
-                self.indices[ x2 ]
+            self.indices[x1],
+            self.indices[x2]
         ]

@@ -8,7 +8,11 @@ Code to test HDPM.
 """
 
 
-import gen_artificial_data as G, pylab as P, itertools, numpy as N, logging
+import gen_artificial_data as G
+import pylab as P
+import itertools
+import numpy as N
+import logging
 from cookbook import pylab_utils
 
 logging.basicConfig(level=logging.INFO)
@@ -16,7 +20,7 @@ logging.basicConfig(level=logging.INFO)
 G.seed(3)
 W = 3
 sampler = G.HDPMSampler(
-    N.arange(5)+10,
+    N.arange(5) + 10,
     20., 10.,
     20., 10.,
     20., 10.,
@@ -31,7 +35,8 @@ logging.info(
 P.figure()
 G.plot_multinomials(
     list(itertools.chain((sampler.pi,), [t for t, Z, X in sampler.documents])),
-    itertools.imap(lambda c: {'color':c}, itertools.cycle(pylab_utils.simple_colours))
+    itertools.imap(lambda c: {'color': c},
+                   itertools.cycle(pylab_utils.simple_colours))
 )
 P.title('Pi and thetas')
 P.show()

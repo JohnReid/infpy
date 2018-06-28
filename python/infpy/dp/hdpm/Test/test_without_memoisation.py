@@ -15,10 +15,10 @@ parser = create_option_parser()
 options, args = parse_options(parser)
 
 
-
 def create_seeded_model():
     numpy.random.seed(options.seed)
     return create_model()
+
 
 def update_model(model):
     model.update()
@@ -39,7 +39,6 @@ model._cachable_fns()[i].set_cache_enabled(False)
 LL_without_caching = update_model(model)
 
 assert LL_with_caching == LL_without_caching
-
 
 
 #

@@ -15,7 +15,7 @@ logging.basicConfig(level=logging.INFO)
 
 class Memoize(object):
 
-    def __init__(self,function):
+    def __init__(self, function):
         self._callable = function
 
     def __call__(self):
@@ -25,8 +25,8 @@ class Memoize(object):
             self.cached_value = self._callable()
             return self.cached_value
 
-memoize = simple_decorator(Memoize)
 
+memoize = simple_decorator(Memoize)
 
 
 class Klass(object):
@@ -45,8 +45,6 @@ class Klass(object):
 
     def log_value(self):
         logging.info(self.value)
-
-
 
 
 o = Klass()

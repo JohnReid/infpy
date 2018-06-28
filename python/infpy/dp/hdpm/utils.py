@@ -8,12 +8,10 @@ Utility functions for HDPM code.
 """
 
 
-import logging, cookbook
+import logging
+import cookbook
 from optparse import OptionGroup
 from cookbook.decorate import simple_decorator
-
-
-
 
 
 def add_hdpm_options(parser):
@@ -69,8 +67,6 @@ def add_hdpm_options(parser):
     parser.add_option_group(hyper_group)
 
 
-
-
 def log_stack(level=logging.INFO, limit=None, tag=None):
     import traceback
     if None != limit:
@@ -86,19 +82,19 @@ def log_stack_simple(level=logging.INFO, limit=None, tag=None):
         limit += 1
     logging.log(level, 'STARTING STACK')
     for filename, line_number, function_name, text in traceback.extract_stack(limit=limit)[:-1]:
-        logging.log(level, 'Stack: %s', None != tag and '%s:\t%s' % (tag, function_name) or '\t%s' % function_name)
+        logging.log(level, 'Stack: %s', None != tag and '%s:\t%s' %
+                    (tag, function_name) or '\t%s' % function_name)
     logging.log(level, 'ENDING STACK')
 
 
 def check_stack_for_multiple_calculates():
     "Examines stacks to see if we have called a _calculate_ function recursively. For debugging purposes."
     import traceback
-    stack = list(filter(lambda e: e[2].startswith('_calculate_'), traceback.extract_stack()))
+    stack = list(filter(lambda e: e[2].startswith(
+        '_calculate_'), traceback.extract_stack()))
     if len(stack) > 1:
         log_stack()
-        1/0
-
-
+        1 / 0
 
 
 class ProtectAgainstRecursion(object):
@@ -118,13 +114,13 @@ class ProtectAgainstRecursion(object):
             self.in_call = False
         return result
 
-protect_against_recursion = simple_decorator(ProtectAgainstRecursion)
 
+protect_against_recursion = simple_decorator(ProtectAgainstRecursion)
 
 
 class Memoize(object):
 
-    def __init__(self,function):
+    def __init__(self, function):
         self._callable = function
         self.set_cache_enabled(True)
         self.logging_level = None
@@ -142,31 +138,34 @@ class Memoize(object):
     def __call__(self):
         if not self._cache_enabled:
             if None != self.logging_level:
-                logging.log(self.logging_level, 'Memoize: %s: cache disabled.', self._callable.__name__)
+                logging.log(
+                    self.logging_level, 'Memoize: %s: cache disabled.', self._callable.__name__)
             return self._callable()
         else:
             try:
                 value = self.cached_value
                 if None != self.logging_level:
-                    logging.log(self.logging_level, 'Memoize: %s: using cached value.', self._callable.__name__)
+                    logging.log(
+                        self.logging_level, 'Memoize: %s: using cached value.', self._callable.__name__)
                 return value
             except AttributeError:
                 if None != self.logging_level:
-                    logging.log(self.logging_level, 'Memoize: %s: calculating cached value.', self._callable.__name__)
+                    logging.log(
+                        self.logging_level, 'Memoize: %s: calculating cached value.', self._callable.__name__)
                 self.cached_value = self._callable()
                 return self.cached_value
 
     def clear_cached_value(self):
         if None != self.logging_level:
-            logging.log(self.logging_level, 'Memoize: %s: clearing cached value.', self._callable.__name__)
+            logging.log(
+                self.logging_level, 'Memoize: %s: clearing cached value.', self._callable.__name__)
         try:
             del self.cached_value
         except AttributeError:
             pass
 
+
 memoize = simple_decorator(Memoize)
-
-
 
 
 @simple_decorator
@@ -177,4 +176,3 @@ def log_result(fn):
         logging.info("Result of %s: %s", fn.__name__, str(result))
         return result
     return wrapper
-

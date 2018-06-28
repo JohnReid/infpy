@@ -7,11 +7,17 @@
 Sample from infinite multinomials. Useful for Dirichlet processes.
 """
 
-import bisect, logging, scipy.stats as S, itertools, numpy.random as R, pylab as P, numpy as N, cookbook.pylab_utils as pylab_utils
+import bisect
+import logging
+import scipy.stats as S
+import itertools
+import numpy.random as R
+import pylab as P
+import numpy as N
+import cookbook.pylab_utils as pylab_utils
 
 
-
-#def rBeta(alpha, beta):
+# def rBeta(alpha, beta):
 #    "Draw from a beta distribution."
 #    x = S.beta.rvs(alpha, beta)
 #    if N.isnan(x):
@@ -23,11 +29,9 @@ def rBeta(alpha, beta):
     from rpy2.robjects import r
     x = r.rbeta(1, alpha, beta)
     if N.isnan(x):
-        raise RuntimeError('Cannot draw from beta distribution with parameters: (%f, %f)' % (alpha, beta))
+        raise RuntimeError(
+            'Cannot draw from beta distribution with parameters: (%f, %f)' % (alpha, beta))
     return x[0]
-
-
-
 
 
 class LazyInfiniteSequence(list):
@@ -47,16 +51,14 @@ class LazyInfiniteSequence(list):
         "Get the k'th item, extending lazily if necessary."
         while len(self) <= idx:
             top = self.extender()
-            logging.debug("Extending lazy infinite (%d) sequence with %s. Now length = %d.", id(self), str(top), len(self))
+            logging.debug("Extending lazy infinite (%d) sequence with %s. Now length = %d.", id(
+                self), str(top), len(self))
             self.append(top)
         return list.__getitem__(self, idx)
 
     def last(self):
         "@return: the last value."
         return list.__getitem__(self, -1)
-
-
-
 
 
 class InfiniteMultinomial(LazyInfiniteSequence):
@@ -99,7 +101,7 @@ class InfiniteMultinomial(LazyInfiniteSequence):
 
     def num_partitions(self):
         "@return: The number of partitions we have so far."
-        return len(self)-1
+        return len(self) - 1
 
     def partition_start(self, j):
         "@return: The start of the partition."
@@ -107,13 +109,11 @@ class InfiniteMultinomial(LazyInfiniteSequence):
 
     def partition_end(self, j):
         "@return: The end of the partition."
-        return self[j+1]
+        return self[j + 1]
 
     def x(self, j):
         "@return: The x for the given partition. That is the weight of that partition."
-        return self[j+1] - self[j]
-
-
+        return self[j + 1] - self[j]
 
 
 class StickBreaker(InfiniteMultinomial):
@@ -136,7 +136,6 @@ class StickBreaker(InfiniteMultinomial):
         return top
 
 
-
 class InfiniteDirichlet(InfiniteMultinomial):
     """
     Lazy sampling from an infinite Dirchlet distribution.
@@ -153,12 +152,13 @@ class InfiniteDirichlet(InfiniteMultinomial):
 
     def _extend(self):
         "Extend the stick breaking construction by one partition."
-        j = self.num_partitions() # new partition is just past end of existing ones
-        phi_j = rBeta(self.strength * self.alpha.x(j), self.strength * (1. - self.alpha.partition_start(j+1)))
+        j = self.num_partitions()  # new partition is just past end of existing ones
+        phi_j = rBeta(self.strength * self.alpha.x(j),
+                      self.strength * (1. - self.alpha.partition_start(j + 1)))
         assert 0. <= phi_j
         assert phi_j <= 1.
         top = self.last()
-        top = top + (1. - self.partition_end(j-1)) * phi_j
+        top = top + (1. - self.partition_end(j - 1)) * phi_j
         return top
 
 
@@ -171,10 +171,8 @@ def plot_multinomials(multis, kwargs_list=None):
     if None == kwargs_list:
         kwargs_list = itertools.repeat(dict())
     for n, (multi, kwargs) in enumerate(zip(multis, kwargs_list)):
-        P.bar(N.arange(K) + (-width*M/2 + n*width), [multi.x(k) for k in xrange(K)], width, **kwargs)
-
-
-
+        P.bar(N.arange(K) + (-width * M / 2 + n * width),
+              [multi.x(k) for k in xrange(K)], width, **kwargs)
 
 
 if '__main__' == __name__:
@@ -201,8 +199,9 @@ if '__main__' == __name__:
 
     for partition in xrange(infinite_dirichlet.num_partitions()):
         logging.info('Partition %2d: stick: %.5f   infinite dirichlet: %.5f',
-            partition, stick.x(partition), infinite_dirichlet.x(partition)
-        )
+                     partition, stick.x(
+                         partition), infinite_dirichlet.x(partition)
+                     )
 
     strong_infinite_dirichlet = InfiniteDirichlet(10., stick)
     for i in xrange(20):
@@ -217,6 +216,6 @@ if '__main__' == __name__:
     P.figure()
     plot_multinomials(
         (stick, strong_infinite_dirichlet, weak_infinite_dirichlet),
-        ({'color':'r'}, {'color':'b'}, {'color':'g'})
+        ({'color': 'r'}, {'color': 'b'}, {'color': 'g'})
     )
     P.show()

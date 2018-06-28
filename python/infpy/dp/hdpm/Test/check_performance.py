@@ -9,7 +9,10 @@ Code to test the performance of the HDPM. Use with the cProfile module:
 python -O -m cProfile -o hdpm.prof Test/check_performance.py
 """
 
-import gen_artificial_data, hdpm, numpy, logging
+import gen_artificial_data
+import hdpm
+import numpy
+import logging
 from optparse import OptionParser
 
 logging.basicConfig(level=logging.INFO)
@@ -41,7 +44,8 @@ options, args = parser.parse_args()
 logging.info('Options:')
 for option in parser.option_list:
     if option.dest:
-        logging.info('%32s: %-32s * %s', option.dest, str(getattr(options, option.dest)), option.help)
+        logging.info('%32s: %-32s * %s', option.dest,
+                     str(getattr(options, option.dest)), option.help)
 
 numpy.random.seed(options.seed)
 
@@ -50,7 +54,7 @@ def create_model(D, d, K, W):
     tau = numpy.ones((W,))
 
     sampler = gen_artificial_data.HDPMSampler(
-        numpy.ones((D,), dtype=int) * d, # document sizes
+        numpy.ones((D,), dtype=int) * d,  # document sizes
         1., 1.,
         1., 1.,
         1., 1.,
@@ -71,14 +75,15 @@ def create_model(D, d, K, W):
 
 
 for D, d, K, W in (
-    (100,  30, 100,  60),
-#    (  2, 100,   5,   2),
-#    (  2, 100,  13,  40),
-#    ( 20,  10,   5,   2),
-#    ( 10,  50,  50, 200),
-#    (500,   2,   9,  20),
+    (100, 30, 100, 60),
+    #    (  2, 100,   5,   2),
+    #    (  2, 100,  13,  40),
+    #    ( 20,  10,   5,   2),
+    #    ( 10,  50,  50, 200),
+    #    (500,   2,   9,  20),
 ):
-    logging.info('Testing model of dimensions: D=%3d; d=%3d; K=%3d; W=%3d', D, d, K, W)
+    logging.info(
+        'Testing model of dimensions: D=%3d; d=%3d; K=%3d; W=%3d', D, d, K, W)
     model = create_model(D, d, K, W)
     for i in xrange(options.iterations):
         model.update()

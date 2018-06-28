@@ -6,7 +6,8 @@
 Code to run HDPM.
 """
 
-import logging, numpy
+import logging
+import numpy
 
 import infpy.dp.hdpm.math
 reload(infpy.dp.hdpm.math)
@@ -20,10 +21,11 @@ from infpy.convergence_test import LlConvergenceTest
 
 logging.basicConfig(level=logging.DEBUG)
 
-F, K, G, average_n_g = (12, 80, 100,  50)
+F, K, G, average_n_g = (12, 80, 100, 50)
 
 numpy.random.seed(2)
-logging.debug('Testing sampled data with F=%d; K=%d; G=%d, average n_g=%d', F, K, G, average_n_g)
+logging.debug(
+    'Testing sampled data with F=%d; K=%d; G=%d, average n_g=%d', F, K, G, average_n_g)
 
 options = U.get_default_options()
 options.a_tau = numpy.ones(F)
@@ -40,10 +42,11 @@ Summariser(dist, 'output/sampled/summary').summarise_all()
 
 history = InferenceHistory(dist)
 LL = dist.log_likelihood()
-LL_tolerance = 1e-8*data.N
+LL_tolerance = 1e-8 * data.N
 logging.info('Tolerance in LL: %e', LL_tolerance)
 max_iters = 50
-convergence_test = LlConvergenceTest(eps=LL_tolerance, use_absolute_difference=True)
+convergence_test = LlConvergenceTest(
+    eps=LL_tolerance, use_absolute_difference=True)
 for i in xrange(max_iters):
     dist.update()
     history.update()

@@ -8,7 +8,12 @@ Code to test HDPM initialisation methods.
 """
 
 
-import infpy.dp.gen_artificial_data as G, logging, numpy.random, basics, numpy as N, infpy.dp.hdpm as hdpm
+import infpy.dp.gen_artificial_data as G
+import logging
+import numpy.random
+import basics
+import numpy as N
+import infpy.dp.hdpm as hdpm
 
 logging.basicConfig(level=logging.INFO)
 
@@ -27,14 +32,14 @@ G.seed(options.seed)
 W = 5
 D = 20
 a_alpha, b_alpha = 20., 10.
-a_beta,  b_beta  = 20., 10.
+a_beta, b_beta  = 20., 10.
 a_gamma, b_gamma = 20., 10.
 a_tau = N.ones(W)
 document_sizes = numpy.random.poisson(100., D)
 sampler = G.HDPMSampler(
     document_sizes,
     a_alpha, b_alpha,
-    a_beta,  b_beta,
+    a_beta, b_beta,
     a_gamma, b_gamma,
     a_tau
 )
@@ -52,7 +57,7 @@ for i in xrange(options.num_models_to_test):
         W,
         sampler.K() * 3,
         a_alpha, b_alpha,
-        a_beta,  b_beta,
+        a_beta, b_beta,
         a_gamma, b_gamma,
         a_tau,
         init_method=hdpm.HDPM.INIT_METHOD_SAMPLE
@@ -69,7 +74,7 @@ for i in xrange(options.num_models_to_test):
         W,
         sampler.K() * 3,
         a_alpha, b_alpha,
-        a_beta,  b_beta,
+        a_beta, b_beta,
         a_gamma, b_gamma,
         a_tau,
         init_method=hdpm.HDPM.INIT_METHOD_SIMPLE

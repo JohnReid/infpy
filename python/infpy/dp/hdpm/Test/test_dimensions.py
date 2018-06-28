@@ -7,7 +7,9 @@
 Code to test HDPMs with different Ds, Ks and Ws to hopefully spot any bugs where matrices are indexed by the wrong dimension.
 """
 
-import infpy.dp.gen_artificial_data as gen_artificial_data, numpy, logging
+import infpy.dp.gen_artificial_data as gen_artificial_data
+import numpy
+import logging
 import infpy.dp.hdpm as hdpm
 
 logging.basicConfig(level=logging.INFO)
@@ -17,7 +19,7 @@ def create_model(D, d, K, W):
     tau = numpy.ones((W,))
 
     sampler = gen_artificial_data.HDPMSampler(
-        numpy.ones((D,), dtype=int) * d, # document sizes
+        numpy.ones((D,), dtype=int) * d,  # document sizes
         1., 1.,
         1., 1.,
         1., 1.,
@@ -40,11 +42,11 @@ def create_model(D, d, K, W):
 numpy.random.seed(1)
 
 for D, d, K, W in (
-    (  2, 100,   5,   2),
-    (  2, 100,  13,  40),
-    ( 20,  10,   5,   2),
-    ( 10,  50,  50, 200),
-    (500,   2,   9,  20),
+    (2, 100, 5, 2),
+    (2, 100, 13, 40),
+    (20, 10, 5, 2),
+    (10, 50, 50, 200),
+    (500, 2, 9, 20),
 ):
     logging.info('D=%3d; d=%3d; K=%3d; W=%3d', D, d, K, W)
     model = create_model(D, d, K, W)

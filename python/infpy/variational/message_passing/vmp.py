@@ -26,7 +26,6 @@ class Factor(object):
         return visitor.visit_factor(*args, **kwargs)
 
 
-
 class ConditionalDistribution(Factor):
     "A conditional distribution."
     pass
@@ -36,8 +35,6 @@ class ConditionalDistribution(Factor):
         self.target = variables[0]
         "The target of the conditional distribution"
         self.set_conditioned(variables[1:])
-
-
 
 
 class GaussianFactor(ConditionalDistribution):
@@ -69,22 +66,19 @@ class GaussianFactor(ConditionalDistribution):
         if 3 != len(messages):
             raise ValueError('Expecting 3 messages')
         x_msg, mu_msg, gamma_msg = messages
-        if 0 == index: # update for x
+        if 0 == index:  # update for x
             gamma = gamma_msg[0]
             mu = mu_msg[0]
             return numpy.array((gamma * mu, -.5 * gamma))
-        if 1 == index: # update for mu
+        if 1 == index:  # update for mu
             gamma = gamma_msg[0]
             x = x_msg[0]
             return numpy.array((gamma * x, -.5 * gamma))
-        if 2 == index: # update for gamma
+        if 2 == index:  # update for gamma
             mu, mu2 = mu_msg
             x, x2 = x_msg
-            return numpy.array((mu*x-.5*(x2+mu2), .5))
+            return numpy.array((mu * x - .5 * (x2 + mu2), .5))
         raise ValueError('Bad index given.')
-
-
-
 
 
 class GammaFactor(ConditionalDistribution):
@@ -116,24 +110,19 @@ class GammaFactor(ConditionalDistribution):
         if 3 != len(messages):
             raise ValueError('Expecting 3 messages')
         x_msg, a_msg, b_msg = messages
-        if 0 == index: # update for x
+        if 0 == index:  # update for x
             a = a_msg[0]
             b = b_msg[0]
-            return numpy.array((-b, a-1.))
-        if 1 == index: # update for a
+            return numpy.array((-b, a - 1.))
+        if 1 == index:  # update for a
             log_x = x_msg[1]
             log_b = b_msg[1]
             return numpy.array((log_x + log_b, -1.))
-        if 2 == index: # update for b
+        if 2 == index:  # update for b
             x = x_msg[0]
             a = a_msg[0]
             return numpy.array((-x, a))
         raise ValueError('Bad index given.')
-
-
-
-
-
 
 
 class Variable(object):
@@ -163,10 +152,6 @@ class Variable(object):
         """
         #print args
         return visitor.visit_variable(*args, **kwargs)
-
-
-
-
 
 
 class FactorGraph(object):
@@ -218,10 +203,10 @@ class FactorGraph(object):
         from itertools import chain
         variable = self.variable(name)
         return tuple(
-          chain(
-            [variable.dims],
-            (self.plates[p] for p in variable.plates)
-          )
+            chain(
+                [variable.dims],
+                (self.plates[p] for p in variable.plates)
+            )
         )
 
     def add_variable(self, name, variable):
@@ -248,7 +233,8 @@ class FactorGraph(object):
         self.data[factor_v] = factor
         self.shapes[factor_v] = 'box'
         self.names[factor_v] = factor.get_label(variable_names)
-        self.factor_neighbours[factor_v] = [self.variable_vertices[name] for name in variable_names]
+        self.factor_neighbours[factor_v] = [
+            self.variable_vertices[name] for name in variable_names]
         for v in self.factor_neighbours[factor_v]:
             self.g.add_edge(factor_v, v)
 
@@ -263,7 +249,8 @@ class FactorGraph(object):
     def check_plates_specified(self):
         "Raises exception if not all plates in the model have their sizes specified."
         if not self._are_plates_specified():
-            raise ValueError('Plates in model are not specified.\n%s' % str(self.plates))
+            raise ValueError(
+                'Plates in model are not specified.\n%s' % str(self.plates))
 
     def variable_names(self):
         "@return: A sequence of the variable names in the model."
@@ -278,10 +265,6 @@ class FactorGraph(object):
         return isinstance(self.data[v], Variable)
 
 
-
-
-
-
 def create_factorised_variational_distribution(model, hidden_variables):
     """
     Initialise this factorised variational distribution.
@@ -290,15 +273,10 @@ def create_factorised_variational_distribution(model, hidden_variables):
     @arg hidden_variables: A sequence of names of the hidden variables.
     """
     return dict(
-      (hidden, numpy.zeros(model.get_variable_shape(hidden)))
-      for hidden
-      in hidden_variables
+        (hidden, numpy.zeros(model.get_variable_shape(hidden)))
+        for hidden
+        in hidden_variables
     )
-
-
-
-
-
 
 
 class LocalMessagePasser(object):
@@ -328,7 +306,6 @@ class LocalMessagePasser(object):
 
         self.set_adjacent(self.g.adjacent_vertices(self.v))
 
-
     def set_adjacent(self, adjacent):
         self.adjacent = list(adjacent)
         "A list of adjacent vertices."
@@ -338,7 +315,6 @@ class LocalMessagePasser(object):
         for i, v in enumerate(self.adjacent):
             self.indices[v] = i
 
-
     def prepare(self):
         "Reset the message passer ready for another round of message passing."
         self.rcvd = [None] * len(self.adjacent)
@@ -347,17 +323,14 @@ class LocalMessagePasser(object):
         self.sent = [None] * len(self.adjacent)
         "Keep track of which vertices we have sent messages to."
 
-
     def clean_up(self):
         "Called after a round of message passing has completed."
         del self.rcvd
         del self.sent
 
-
     def on_receive(self, src, msg):
         "Override to implement event handling when messages are received."
         pass
-
 
     def receive_message(self, src, msg):
         """
@@ -374,43 +347,41 @@ class LocalMessagePasser(object):
         # check if the new message enables us to send any messages
         self.send_messages()
 
-
     def send_messages(self):
         "Send any messages we are able to calculate."
         num_not_rcvd = self.rcvd.count(None)
-        if num_not_rcvd < 2: # can only send message if received all but one or less
+        if num_not_rcvd < 2:  # can only send message if received all but one or less
             for v in self.adjacent:
                 # if we have not sent this vertex a message and we have received all messages or just not from this one.
                 index = self.indices[v]
                 if None == self.sent[index] and (0 == num_not_rcvd or None == self.rcvd[index]):
                     msg = self.create_message(v)
                     if None == msg:
-                        raise RuntimeError('Messages cannot be None. Please override create_message().')
-                    self.sent[index] = msg # remember we have sent it
-                    print 'Sending  message: %s: %s -> %s' % (msg, self._get_name(self.v), self._get_name(v))
-                    self.msg_passer_map[v].receive_message(self.v, msg) # send it
-
-
+                        raise RuntimeError(
+                            'Messages cannot be None. Please override create_message().')
+                    self.sent[index] = msg  # remember we have sent it
+                    print 'Sending  message: %s: %s -> %s' % (
+                        msg, self._get_name(self.v), self._get_name(v))
+                    self.msg_passer_map[v].receive_message(
+                        self.v, msg)  # send it
 
     def create_message(self, dst):
         "Called to create a message to send to given destination."
         return None
 
-
     def check_all_messages_received_and_sent(self):
         "Raises an error if not all messages have been received and sent."
         if self.rcvd.count(None) != 0:
-            raise RuntimeError("Did not receive messages from every neighbour.")
+            raise RuntimeError(
+                "Did not receive messages from every neighbour.")
         if self.sent.count(None) != 0:
             raise RuntimeError("Did not send messages to every neighbour.")
-
 
     def _get_name(self, v):
         if None != self.name_map:
             return self.name_map[v]
         else:
             return '<no name>'
-
 
 
 def create_local_message_passers(g, message_passer_creator):
@@ -428,9 +399,6 @@ def create_local_message_passers(g, message_passer_creator):
     return msg_passer_map
 
 
-
-
-
 def pass_local_messages(g, msg_passer_map):
     "Pass messages locally over a graph."
     for v in g.vertices:
@@ -443,10 +411,6 @@ def pass_local_messages(g, msg_passer_map):
         msg_passer_map[v].clean_up()
 
 
-
-
-
-
 class ObservedVertexMessagePasser(LocalMessagePasser):
     "Produces/consumes messages for an observed vertex."
 
@@ -457,8 +421,6 @@ class ObservedVertexMessagePasser(LocalMessagePasser):
 
     def create_message(self, dst):
         return self.observed
-
-
 
 
 class HiddenVertexMessagePasser(LocalMessagePasser):
@@ -484,11 +446,8 @@ class HiddenVertexMessagePasser(LocalMessagePasser):
         self.distribution[:] = self.msg_sum
         del self.msg_sum
         LocalMessagePasser.clean_up(self)
-        print 'New variational distribution: %s: %s' % (self._get_name(self.v), self.distribution)
-
-
-
-
+        print 'New variational distribution: %s: %s' % (
+            self._get_name(self.v), self.distribution)
 
 
 class FactorVertexMessagePasser(LocalMessagePasser):
@@ -502,11 +461,6 @@ class FactorVertexMessagePasser(LocalMessagePasser):
 
     def create_message(self, dst):
         return self.factor.calculate_update(self.rcvd, self.indices[dst])
-
-
-
-
-
 
 
 class VariationalUpdater(object):
@@ -528,28 +482,29 @@ class VariationalUpdater(object):
         "The observed values in the model."
 
         self.var_dist = create_factorised_variational_distribution(
-          model,
-          [
-            variable
-            for variable
-            in self.model.variable_names()
-            if variable not in data
-          ]
+            model,
+            [
+                variable
+                for variable
+                in self.model.variable_names()
+                if variable not in data
+            ]
         )
         "Dict mapping hidden variable names to their factorised variational distributions."
 
-        self.msg_passer_map = create_local_message_passers(self.model.g, self._create_msg_handler_for)
+        self.msg_passer_map = create_local_message_passers(
+            self.model.g, self._create_msg_handler_for)
 
     def visit_factor(self, *args, **kwargs):
         #print 'Visiting factor'
         g, v, msg_passer_map, data = args
         return FactorVertexMessagePasser(
-          g,
-          v,
-          msg_passer_map,
-          data,
-          self.model.factor_neighbours[v],
-          self.model.names
+            g,
+            v,
+            msg_passer_map,
+            data,
+            self.model.factor_neighbours[v],
+            self.model.names
         )
 
     def visit_variable(self, *args, **kwargs):
@@ -559,19 +514,19 @@ class VariationalUpdater(object):
         name = self.model.names[v]
         if name in self.observed_values:
             return ObservedVertexMessagePasser(
-              g,
-              v,
-              msg_passer_map,
-              self.observed_values[name],
-              self.model.names
+                g,
+                v,
+                msg_passer_map,
+                self.observed_values[name],
+                self.model.names
             )
         else:
             return HiddenVertexMessagePasser(
-              g,
-              v,
-              msg_passer_map,
-              self.var_dist[name],
-              self.model.names
+                g,
+                v,
+                msg_passer_map,
+                self.var_dist[name],
+                self.model.names
             )
         print args
         print kwargs
@@ -582,8 +537,6 @@ class VariationalUpdater(object):
 
     def update(self):
         pass_local_messages(self.model.g, self.msg_passer_map)
-
-
 
 
 if '__main__' == __name__:
@@ -602,13 +555,13 @@ if '__main__' == __name__:
     model.set_plate_size('N', N)
     model.g.write_graphviz('model.dot')
     os.system('dot -T svg model.dot -o model.svg')
-    
+
     data = {
-      'm' : GaussianFactor.convert_mu(0.),
-      'beta' : GaussianFactor.convert_gamma(1.),
-      'a' : GammaFactor.convert_a(1.),
-      'b' : GammaFactor.convert_b(1.),
-      'x' : GaussianFactor.convert_x(R.normal(1.6, .1, (N,))).sum(axis=1),
+        'm': GaussianFactor.convert_mu(0.),
+        'beta': GaussianFactor.convert_gamma(1.),
+        'a': GammaFactor.convert_a(1.),
+        'b': GammaFactor.convert_b(1.),
+        'x': GaussianFactor.convert_x(R.normal(1.6, .1, (N,))).sum(axis=1),
     }
     updater = VariationalUpdater(model, data)
     updater.update()
