@@ -1,5 +1,5 @@
 #
-# Copyright John Reid 2009, 2010, 2011, 2012
+# Copyright John Reid 2009, 2010, 2011, 2012, 2018
 #
 
 from setuptools import setup, find_packages
