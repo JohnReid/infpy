@@ -51,7 +51,7 @@ logging.info(
 
 logging.info('Running sampled models.')
 best_sample_LL = None
-for i in xrange(options.num_models_to_test):
+for i in range(options.num_models_to_test):
     sampled_model = hdpm.HDPM(
         sampler.get_documents(),
         W,
@@ -68,7 +68,7 @@ for i in xrange(options.num_models_to_test):
 
 logging.info('Running simply initialised models.')
 best_simple_LL = None
-for i in xrange(options.num_models_to_test):
+for i in range(options.num_models_to_test):
     sampled_model = hdpm.HDPM(
         sampler.get_documents(),
         W,

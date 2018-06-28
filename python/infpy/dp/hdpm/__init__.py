@@ -8,10 +8,10 @@ Implementation of hierarchical Dirichlet processes as detailed in
 http://www.gatsby.ucl.ac.uk/~ywteh/research/inference/nips2007b.pdf
 """
 
-from math import *
-from math import _greater_than, _permutation_by_sort, _permute, _approx_f_n, _gamma_KL, _dirichlet_KL, _beta_KL, _safe_x_log_x
-from utils import *
-from summarise import *
+from .math import *
+from .math import _greater_than, _permutation_by_sort, _permute, _approx_f_n, _gamma_KL, _dirichlet_KL, _beta_KL, _safe_x_log_x
+from .utils import *
+from .summarise import *
 import types
 
 
@@ -158,7 +158,7 @@ class HDPM(object):
 
     def __getstate__(self):
         state = {}
-        for attr, value in self.__dict__.iteritems():
+        for attr, value in self.__dict__.items():
             if not isinstance(value, Memoize):
                 state[attr] = value
         return state
@@ -301,7 +301,7 @@ class HDPM(object):
         "Variational distribution over pi_bar"
         pi_bar = self.q_pi_bar.sample()
         pi = numpy.empty_like(pi_bar)
-        for k in xrange(self.K - 1):
+        for k in range(self.K - 1):
             pi[k] = pi_bar[k] * (1. - pi_bar[:k]).prod()
         pi[-1] = 1. - pi[:-1].sum()
         if pi[-1] < 0.:  # adjust for numerical errors
@@ -374,7 +374,7 @@ class HDPM(object):
     def _calculate_G_pi(self):
         accum = numpy.empty((self.K,))
         accum[0] = 1.
-        for k in xrange(1, self.K):
+        for k in range(1, self.K):
             accum[k] = accum[k - 1] * self.q_1_minus_pi_bar.G[k - 1]
         G_pi = self.q_pi_bar.G * accum
         assert numpy.isfinite(G_pi).all()
@@ -837,7 +837,7 @@ def test_permutation():
     a = numpy.array((3, 2, 1, 6, 5, 4, 10, 0))
     p = _permutation_by_sort(a)
     a_permuted = _permute(a, p)  # b should be in decreasing order
-    b = numpy.array([a + 100 * i for i in xrange(4)])
+    b = numpy.array([a + 100 * i for i in range(4)])
     # b's second axis should be in decreasing order
     b_permuted = _permute(b, p, axis=1)
     return p, a, a_permuted, b, b_permuted
@@ -856,16 +856,16 @@ def test_dpm():
         numpy.array([1, 1, 2, 3, 2, 3, 2, 3, 2, 2, 0, 0, 0, 2]),
     ]
     dpm = HDPM(documents=documents, K=K, W=W)
-    for _i in xrange(60):
+    for _i in range(60):
         # print dpm.entropy()
         dpm.update()
-        print dpm.log_likelihood()
-    print 'Expected # words in each topic'
-    print dpm.counts.E_n_dk.sum(axis=0)
-    print 'Topic per document distributions'
-    print (dpm.counts.E_n_dk.T / dpm.counts.E_n_dk.sum(axis=1)).T
-    print 'Topic distributions'
-    print (dpm.counts.E_n_kw.T / dpm.counts.E_n_kw.sum(axis=1)).T
+        print(dpm.log_likelihood())
+    print('Expected # words in each topic')
+    print(dpm.counts.E_n_dk.sum(axis=0))
+    print('Topic per document distributions')
+    print((dpm.counts.E_n_dk.T / dpm.counts.E_n_dk.sum(axis=1)).T)
+    print('Topic distributions')
+    print((dpm.counts.E_n_kw.T / dpm.counts.E_n_kw.sum(axis=1)).T)
 
 
 def sample_chinese_restaurant(alpha, N):
@@ -876,7 +876,7 @@ def sample_chinese_restaurant(alpha, N):
     """
     import numpy.random as R
     partition_sizes = [float(alpha)]
-    for n in xrange(N):
+    for n in range(N):
                 # choose which partition it came from
         multi_sample = R.multinomial(
             1, numpy.array(partition_sizes) / (alpha + n))

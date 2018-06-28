@@ -11,8 +11,8 @@ import math
 import sys
 import warnings
 
-from sum_kernel import *
-from se_kernel import *
+from .sum_kernel import *
+from .se_kernel import *
 
 from numpy import matrix, array, zeros, log, diagonal, trace, arange, asarray, mean, sqrt
 
@@ -105,7 +105,7 @@ class GaussianProcess(object):
         else:
             try:
                 self._L = matrix(cholesky(self._K))
-            except LinAlgError, detail:
+            except LinAlgError as detail:
                 raise RuntimeError("""Cholesky decomposition of covariance """
                                    """matrix failed. Your kernel may not be positive """
                                    """definite. Scipy complained: %s""" % detail)
@@ -358,7 +358,7 @@ def gp_plot_samples_from(
     from pylab import plot
     mean, sigma, LL = gp.predict(support)
     gp_plot_prediction(support, mean, sigma)
-    for i in xrange(num_samples):
+    for i in range(num_samples):
         sample = numpy.random.multivariate_normal(
             asarray(mean).reshape(len(support),),
             sigma
@@ -412,7 +412,7 @@ def gp_title_and_show(gp):
     """
     from pylab import title, show
     t = 'Log likelihood: %f\n%s' % (gp.LL, gp.k.params)
-    print t
+    print(t)
     title(t)
     show()
 
@@ -459,7 +459,7 @@ def gp_loo_predict_i(k, X, y, i):
 
 def gp_loo_predict(k, X, y):
     """Calls gp_loo_predict_i for all i and yields the return value"""
-    for i in xrange(len(X)):
+    for i in range(len(X)):
         yield gp_loo_predict_i(k, X, y, i)
 
 

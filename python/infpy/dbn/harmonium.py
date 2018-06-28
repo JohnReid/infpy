@@ -71,8 +71,8 @@ def contrastive_divergence_iteration(
     lambda_update = [zeros_like(h.phi) for h in harmonium.hidden]
     W_update = empty((len(theta_update), len(
         lambda_update)), dtype=numpy.object_)
-    for i in xrange(len(theta_update)):
-        for j in xrange(len(lambda_update)):
+    for i in range(len(theta_update)):
+        for j in range(len(lambda_update)):
             W_update[i, j] = zeros(
                 (len(theta_update[i]), len(lambda_update[j])))
 

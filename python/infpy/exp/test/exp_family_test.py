@@ -419,7 +419,7 @@ class MvnConjPriorTests(unittest.TestCase):
                     calculated_mu_W_mu = k / kappa_0 + \
                         nu * dot(mu_0, dot(S, mu_0))
                     calculated_log_W = sum(
-                        digamma((nu - i) / 2.) for i in xrange(k)) + log(det(S)) + k * log(2.)
+                        digamma((nu - i) / 2.) for i in range(k)) + log(det(S)) + k * log(2.)
 
                     sampled_W = wishart.sample(
                         eta=wishart.eta((nu, S)), size=sample_size)
@@ -482,7 +482,7 @@ class HighDMvnTest(unittest.TestCase):
                     # dimension
         self.families = [
             infpy.exp.MvnExpFamily(k=dim)
-            for dim in xrange(2, 10)  # check up to 10-D
+            for dim in range(2, 10)  # check up to 10-D
         ]
 
         # give each family a typical set of xs and thetas

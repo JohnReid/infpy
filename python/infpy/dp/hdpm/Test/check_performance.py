@@ -85,5 +85,5 @@ for D, d, K, W in (
     logging.info(
         'Testing model of dimensions: D=%3d; d=%3d; K=%3d; W=%3d', D, d, K, W)
     model = create_model(D, d, K, W)
-    for i in xrange(options.iterations):
+    for i in range(options.iterations):
         model.update()

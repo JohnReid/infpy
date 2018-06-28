@@ -221,7 +221,7 @@ def get_new_roc_parameter(rocs, for_specificity=True):
         (abs(statistic(rocs[i][1]) - statistic(rocs[i + 1][1])),
          (rocs[i][0] + rocs[i + 1][0]) / 2)
         for i
-        in xrange(len(rocs) - 1)
+        in range(len(rocs) - 1)
     ]
     return max(diffs)[1]
 
@@ -257,8 +257,8 @@ def plot_roc_points(rocs, **plot_kwds):
                   DeprecationWarning)
     from pylab import plot
     extended_rocs = list(generate_roc_points(rocs))
-    tprs = map(RocCalculator.tpr, extended_rocs)
-    fprs = map(RocCalculator.fpr, extended_rocs)
+    tprs = list(map(RocCalculator.tpr, extended_rocs))
+    fprs = list(map(RocCalculator.fpr, extended_rocs))
     return plot(fprs, tprs, **plot_kwds)
 
 
@@ -271,8 +271,8 @@ def plot_rocpoints(rocpoints, fillargs=None, **plot_kwds):
     :returns: The result of pylab.plot call.
     """
     from pylab import plot, fill_between
-    tprs = map(RocCalculator.tpr, rocpoints)
-    fprs = map(RocCalculator.fpr, rocpoints)
+    tprs = list(map(RocCalculator.tpr, rocpoints))
+    fprs = list(map(RocCalculator.fpr, rocpoints))
     if fillargs is not None:
         fill_between(fprs, tprs, **fillargs)
     return plot(fprs, tprs, **plot_kwds)
@@ -454,10 +454,10 @@ def rocs_from_thresholds(positive_thresholds, negative_thresholds, num_points=32
         'DEPRECATED: use infpy.roc.all_rocs_from_thresholds()', DeprecationWarning)
     min_threshold = min(positive_thresholds[0], negative_thresholds[0])
     max_threshold = max(positive_thresholds[-1], negative_thresholds[-1])
-    rocs = map(
+    rocs = list(map(
         make_roc_from_threshold_fn(positive_thresholds, negative_thresholds),
         N.linspace(min_threshold, max_threshold, num_points)[::-1]
-    )
+    ))
     return rocs
 
 
@@ -485,7 +485,7 @@ def pick_roc_thresholds(roc_for_threshold_fn, min_threshold, max_threshold, num_
     while(len(rocs) < num_points):
         # find best new threshold
         biggest_distance, new_threshold = max(
-            map(compare_2_points, rocs[:-1], rocs[1:]))
+            list(map(compare_2_points, rocs[:-1], rocs[1:])))
         add_threshold(new_threshold)
 
     return rocs

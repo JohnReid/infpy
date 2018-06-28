@@ -38,7 +38,7 @@ class DistributionTest(unittest.TestCase):
                 # create some samples
                 num_samples = 100000
                 samples = numpy.zeros(num_samples, numpy.float64)
-                for i in xrange(num_samples):
+                for i in range(num_samples):
                     samples[i] = checked_sample(dist)
 
                 # check statistics
@@ -60,9 +60,9 @@ class DistributionTest(unittest.TestCase):
                                            num_samples
                                        ))
 
-            except Exception, detail:
-                print """Problem with distribution %s: %s""" % (
-                    str(dist), detail)
+            except Exception as detail:
+                print("""Problem with distribution %s: %s""" % (
+                    str(dist), detail))
                 raise
 
     def test_pdf_derivative(self):
@@ -73,7 +73,7 @@ class DistributionTest(unittest.TestCase):
                 dist = dist_gen()
 
                 # try a few samples
-                for i in xrange(30):
+                for i in range(30):
                     x = checked_sample(dist)
 
                     # check the gradients of the pdf
@@ -82,7 +82,7 @@ class DistributionTest(unittest.TestCase):
                         lambda x: dist.dlog_pdf_dx(x[0]),
                         [x])
 
-            except Exception, detail:
+            except Exception as detail:
                 raise RuntimeError("""Problem with distribution %s: %s"""
                                    % (str(dist), detail))
 
@@ -93,7 +93,7 @@ def show_samples(dist):
     # try a few samples
     num_samples = 10000
     samples = numpy.zeros(num_samples, numpy.float64)
-    for i in xrange(num_samples):
+    for i in range(num_samples):
         samples[i] = checked_sample(dist)
     pylab.figure()
     pylab.hist(samples, bins=100)

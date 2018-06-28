@@ -34,7 +34,7 @@ class GenepyTest(unittest.TestCase):
     from random import gauss, randint
     data = [
         ((randint(0, 9), randint(0, 3), gauss(0.0, 1.0)), randint(0, 2))
-        for i in xrange(30)
+        for i in range(30)
     ]
 
     species = DecisionTreeSpecies(context)
@@ -65,7 +65,7 @@ class GenepyTest(unittest.TestCase):
         pop = Population(size=100, species=self.species,
                          fitness_fn=self.fitness_fn)
         pop.post_generation_process = self.species.prune_individuals
-        for gen_idx in xrange(100):
+        for gen_idx in range(100):
             # execute a generation
             pop.generation()
 

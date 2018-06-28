@@ -6,7 +6,7 @@ import unittest
 
 
 def suite():
-    import exp_family_test
+    from . import exp_family_test
     suite = unittest.TestSuite()
     suite.addTests(
         unittest.defaultTestLoader.loadTestsFromModule(exp_family_test))

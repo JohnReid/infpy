@@ -45,7 +45,7 @@ a_beta, b_beta  = 10., .1
 a_gamma, b_gamma = .1, 10.  # gamma should be small in order to encourage few partitions
 a_tau = numpy.ones(W) * 1e2
 
-for model_idx in xrange(options.num_models_to_test):
+for model_idx in range(options.num_models_to_test):
     model = hdpm.HDPM(
         documents, W, K,
         a_alpha, b_alpha,

@@ -45,9 +45,9 @@ mean 0 and precision (inverse variance) 1.
     >>> x = npy.array([0., .5, 1.])  # 3 data in natural form
     >>> T = family.T(x)              # Data in canonical form
     >>> T
-    array([[ 0.  ,  0.  ],
-           [ 0.5 ,  0.25],
-           [ 1.  ,  1.  ]])
+    array([[0.  , 0.  ],
+           [0.5 , 0.25],
+           [1.  , 1.  ]])
     >>> family.log_p_T(T, eta)       # Log probability using canonical form
     array([-0.92, -1.04, -1.42])
     >>> family.log_p_x(x, theta)     # Log probability using natural form
@@ -79,6 +79,7 @@ from numpy.linalg import det, inv, cholesky
 from math import pi
 from scipy.stats import norm
 from scipy.special import gammaln, digamma, polygamma
+from functools import reduce
 
 _log_2_pi = log(2 * pi)
 
@@ -88,7 +89,7 @@ def log_multivariate_gamma(p, a):
     function<http://en.wikipedia.org/wiki/Multivariate_gamma_function>`_ """
 
     return (p * (p - 1.) / 4.) * log(pi) + sum(gammaln((2. * a - j) / 2.)
-                                               for j in xrange(p))
+                                               for j in range(p))
 
 
 def log_factorial(n):
@@ -97,7 +98,7 @@ def log_factorial(n):
     log n!
     """
     assert n >= 0, 'n must be >= 0: n=%d' % n
-    return sum(log(i) for i in xrange(1, n + 1))
+    return sum(log(i) for i in range(1, n + 1))
 
 
 def factorial(n):
@@ -106,7 +107,7 @@ def factorial(n):
     n!
     """
     assert n >= 0, 'n must be >= 0: n=%d' % n
-    return reduce(long.__mul__, xrange(1, n + 1), 1L)
+    return reduce(int.__mul__, range(1, n + 1), 1)
 
 
 class Variable(object):
@@ -816,7 +817,7 @@ class DiscreteExpFamily(ExponentialFamily):
         "x(T), the x that has the sufficient statistics, T"
         assert self._check_shape(
             T), 'T does not have the correct shape: %s' % str(T.shape)
-        for x in xrange(self.dimension):
+        for x in range(self.dimension):
             if T[x]:
                 return x
         else:
@@ -1066,7 +1067,7 @@ class WishartExpFamily(ExponentialFamily):
         n, V = self.theta(eta)
         T = self._empty()
         T[0] = self.p * log(2.) + log(det(V)) + \
-            sum(digamma((n - i) / 2.) for i in xrange(self.p))
+            sum(digamma((n - i) / 2.) for i in range(self.p))
         T[1:] = (n * V).reshape(self.p ** 2,)
         return T
 
@@ -1113,12 +1114,12 @@ class WishartExpFamily(ExponentialFamily):
         n, V = self.theta(eta)
         L = cholesky(V)
         std_norm = norm(0, 1)
-        for sample_idx in xrange(size):
+        for sample_idx in range(size):
             # avoid singular matrices by resampling until the determinant is !=
             # 0.0
             while True:
                 A = zeros((self.p, self.p), dtype=float64)
-                for i in xrange(self.p):
+                for i in range(self.p):
                     A[i, :i] = std_norm.rvs(size=i)
                     A[i, i] = sqrt(chi2.rvs(n - i))
                 if det(A) != 0.0:
@@ -1133,7 +1134,7 @@ class WishartExpFamily(ExponentialFamily):
         n, V = self.theta(eta)
         return (self.p * log(2.)
                 + log(det(V))
-                + sum(digamma((n - i) / 2.) for i in xrange(self.p)))
+                + sum(digamma((n - i) / 2.) for i in range(self.p)))
 
     def _n_V_from_theta(self, theta):
         """Helper method to extract n and V from theta and ensure are
@@ -1411,7 +1412,7 @@ class NormalWishartExpFamily(ExponentialFamily):
         T = self._empty()
         T[0] = (log(det(S)) + sum(digamma((nu - i) / 2.)
                                   for i
-                                  in xrange(self.p)) - self.p * log(pi)) / 2.
+                                  in range(self.p)) - self.p * log(pi)) / 2.
         T[2:] = self.mvn.eta((mu_0, nu * S))
         T[1] = - dot(mu_0, T[2:2 + self.p]) / 2.
         return T
@@ -1599,7 +1600,7 @@ class MvnConjugatePrior(ConjugatePrior):
             + nu * dot(mu_0, dot(S, mu_0))
             + self.prior.p * log(pi)
             - log(det(S))
-            - sum(digamma((nu - i) / 2.) for i in xrange(self.prior.p))
+            - sum(digamma((nu - i) / 2.) for i in range(self.prior.p))
         ) / 2.
 
 

@@ -7,7 +7,7 @@
 Create artificial test data from a HDPM.
 """
 
-from infinite_multinomials import LazyInfiniteSequence, StickBreaker, InfiniteDirichlet, plot_multinomials
+from .infinite_multinomials import LazyInfiniteSequence, StickBreaker, InfiniteDirichlet, plot_multinomials
 import numpy as N
 import numpy.random as R
 import itertools
@@ -113,13 +113,13 @@ class HDPMSampler(object):
         "Sample a document."
         length = self.document_sizes[d]
         theta = InfiniteDirichlet(self.alpha, self.pi)
-        Z = [theta.draw() for i in xrange(length)]
+        Z = [theta.draw() for i in range(length)]
         X = [rMultinomial(self.programs[z]) for z in Z]
         return theta, Z, X
 
     def sample_data(self):
         "Sample data points."
-        self.documents = [self.sample_document(d) for d in xrange(self.D())]
+        self.documents = [self.sample_document(d) for d in range(self.D())]
 
     def get_documents(self):
         return [X for theta, Z, X in self.documents]
@@ -140,7 +140,7 @@ def summarise_sample(sampler):
     plot_multinomials(
         list(itertools.chain((sampler.pi,), [
              t for t, Z, X in sampler.documents])),
-        itertools.imap(
+        map(
             lambda c, i: {
                 'color': c,
                 'label': i and 'theta[%d]' % (i - 1) or 'pi'

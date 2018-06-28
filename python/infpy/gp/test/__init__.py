@@ -6,8 +6,8 @@ import unittest
 
 
 def suite():
-    import gp_test
-    import kernel_test
+    from . import gp_test
+    from . import kernel_test
     suite = unittest.TestSuite()
     suite.addTests(unittest.defaultTestLoader.loadTestsFromModule(gp_test))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromModule(kernel_test))

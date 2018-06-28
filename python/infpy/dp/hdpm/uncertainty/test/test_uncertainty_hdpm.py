@@ -47,7 +47,7 @@ def test_log_likelihood_per_update(dist, num_updates=5):
     ll_checker = LLChecker()
     last_LL = numpy.asarray(dist._log_likelihood())
     logging.debug('Initial log likelihood: %f', sum(last_LL))
-    for _ in xrange(num_updates):
+    for _ in range(num_updates):
         for update_fn in U.VariationalDistribution.update_fns:
             update_fn(dist)
             last_LL = ll_checker(last_LL, numpy.asarray(

@@ -20,7 +20,7 @@ f = Y + e
 
 
 # plot the noisy data
-print X
+print(X)
 pylab.plot([x[0] for x in X], Y, 'g--', label='Y')
 pylab.plot([x[0] for x in X], f, 'ks', label='f')
 pylab.legend()

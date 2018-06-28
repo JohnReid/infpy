@@ -35,7 +35,7 @@ logging.info(
 P.figure()
 G.plot_multinomials(
     list(itertools.chain((sampler.pi,), [t for t, Z, X in sampler.documents])),
-    itertools.imap(lambda c: {'color': c},
+    map(lambda c: {'color': c},
                    itertools.cycle(pylab_utils.simple_colours))
 )
 P.title('Pi and thetas')

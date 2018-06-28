@@ -275,7 +275,7 @@ def sample(hyperparameters, rho, K, F):
     pi_bar = q_pi_bar.sample()
 
     pi = numpy.empty_like(pi_bar)
-    for k in xrange(K - 1):
+    for k in range(K - 1):
         pi[k] = pi_bar[k] * (1. - pi_bar[:k]).prod()
     pi[-1] = 1. - pi[:-1].sum()
     if pi[-1] < 0.:  # adjust for numerical errors
@@ -319,7 +319,7 @@ def genes_from_sites(sites, rho):
         _tmp = DictOf(list)
         for x_gi, rho_gi in zip(x_g, rho_g):
             _tmp[x_gi].append(rho_gi)
-        result.append(list(_tmp.iteritems()))
+        result.append(list(_tmp.items()))
     return result
 
 
@@ -422,7 +422,7 @@ class VariationalDistribution(object):
         #
         pi_bar = self.q_pi_bar.sample()
         pi = numpy.empty_like(pi_bar)
-        for k in xrange(self.K - 1):
+        for k in range(self.K - 1):
             pi[k] = pi_bar[k] * (1. - pi_bar[:k]).prod()
         pi[-1] = 1. - pi[:-1].sum()
         if pi[-1] < 0.:  # adjust for numerical errors
@@ -501,7 +501,7 @@ class VariationalDistribution(object):
     def _calculate_G_pi(self):
         accum = numpy.empty((self.K,))
         accum[0] = 1.
-        for k in xrange(1, self.K):
+        for k in range(1, self.K):
             accum[k] = accum[k - 1] * self.q_1_minus_pi_bar.G[k - 1]
         self.G_pi = self.q_pi_bar.G * accum
         assert numpy.isfinite(self.G_pi).all()

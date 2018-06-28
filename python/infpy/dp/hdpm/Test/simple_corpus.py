@@ -26,7 +26,7 @@ W = 2
 N = 100
 "Number of words in each document."
 
-documents = [[i] * N for i in xrange(W)]
+documents = [[i] * N for i in range(W)]
 "The documents."
 
 K = 3 * W

@@ -81,7 +81,7 @@ def log_likelihood(model):
 #
 # Learn some models and check LL
 #
-for m in xrange(options.num_models_to_test):
+for m in range(options.num_models_to_test):
     logging.info('Learning model %d.', m)
     model = hdpm.HDPM(documents, W, K)
 
@@ -95,7 +95,7 @@ for m in xrange(options.num_models_to_test):
     coarse_checker = LLchecker('COARSE', LL)
     convergence_test = LlConvergenceTest(
         eps=.01, should_increase=False, use_absolute_difference=True)
-    for iter in xrange(options.max_iters):
+    for iter in range(options.max_iters):
 
         for update_fn in hdpm.HDPM.update_fns:
             before = log_likelihood(model)

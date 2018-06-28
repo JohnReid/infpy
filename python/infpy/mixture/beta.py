@@ -6,7 +6,7 @@
 Code for mixtures of beta distributions.
 """
 
-from __future__ import with_statement
+
 
 import logging
 from optparse import OptionParser
@@ -115,7 +115,7 @@ def estimate_beta_parameters(tau, nu, max_iter=5000, tol=1e-12):
     logging.info('tau = %s; nu = %f', tau, nu)
     log_p_bar = tau / nu
     alpha = johnson_kotz_alpha_starting_point(log_p_bar)
-    for i in xrange(max_iter):
+    for i in range(max_iter):
         last_alpha = alpha.copy()
         for k, _p in enumerate(log_p_bar):
             alpha[k] = digamma_inv(digamma(alpha.sum()) + _p)
@@ -467,7 +467,7 @@ class EtaPointEstimates(EtaDist):
         # get point estimates for etas
         if __debug__:
             last_bound = mixture.variational_bound_piecewise()
-        for k in xrange(self.K):
+        for k in range(self.K):
             # new estimate for eta
             #            self.eta[k] = self.ML_estimate2(mixture, mixture.q_z.params[:,k])
             # old estimate for eta
@@ -502,7 +502,7 @@ class EtaPointEstimates(EtaDist):
         "@return: The probability of a number of points in X-space."
         assert 2 == len(T.shape)
         p = np.empty((self.K, len(T)))
-        for k in xrange(self.K):
+        for k in range(self.K):
             p[k] = np.exp(np.dot(T, self.eta[k]) -
                           betaln(self.eta[k, 0] + 1., self.eta[k, 1] + 1.))
         assert (0. <= p).all()
@@ -686,7 +686,7 @@ class EtaFullDists(EtaDist):
         assert np.isfinite(self.tau).all()
 
         # calculate some quantities we need later...
-        for k in xrange(self.K):
+        for k in range(self.K):
             # calculate normalising constant
             self.conj_prior_A[k] = beta_conj_prior_log_partition(
                 self.tau[k], self.nu[k])
@@ -716,7 +716,7 @@ class EtaFullDists(EtaDist):
         T = self.exp_family.T(X)
         assert T.shape == (num_points, 2)
         p = np.empty((self.K, num_points))
-        for k in xrange(self.K):
+        for k in range(self.K):
             p[k] = beta_conj_prior_predictive_T(
                 T, self.tau[k], self.nu[k], A=self.conj_prior_A[k])
         return X[:, 0], p
@@ -725,7 +725,7 @@ class EtaFullDists(EtaDist):
         "@return: The probability of a number of points in X-space."
         assert 2 == len(T.shape)
         p = np.empty((self.K, len(T)))
-        for k in xrange(self.K):
+        for k in range(self.K):
             for t, _T in enumerate(T):
                 p[k, t] = np.exp(beta_conj_prior_log_partition(
                     self.tau[k] + _T, self.nu[k] + 1.) - self.conj_prior_A[k])
@@ -812,7 +812,7 @@ class StickBreakingPiDist(object):
         result = self._pi_bar.E.copy()
         E_1_minus = self._1_minus_pi_bar.E
         accum = 1.
-        for k in xrange(1, self.K - 1):
+        for k in range(1, self.K - 1):
             accum *= E_1_minus[k - 1]
             result[k] *= accum
         result[-1] = 1. - result[:-1].sum()
@@ -1210,7 +1210,7 @@ class ExpFamilyMixture(object):
         test = LlConvergenceTest(
             eps=eps, should_increase=True, use_absolute_difference=True)
         last_bound = None
-        for i in xrange(max_iter):
+        for i in range(max_iter):
             if None == last_bound:
                 last_bound = self.variational_bound_piecewise()
                 test(last_bound.sum())
@@ -1374,7 +1374,7 @@ if '__main__' == __name__:
 
     pl.close('all')
 
-    for seed in xrange(1, 3):
+    for seed in range(1, 3):
         logging.info('Seeding numpy with %d', seed)
         np.random.seed(seed)
 
@@ -1426,7 +1426,7 @@ if '__main__' == __name__:
                 eps=options.tolerance, should_increase=True, use_absolute_difference=True)
             bound = mixture.variational_bound()
             test(bound)
-            for _i in xrange(options.max_iter):
+            for _i in range(options.max_iter):
                 mixture.update()
                 bound = mixture.variational_bound()
                 logging.info(

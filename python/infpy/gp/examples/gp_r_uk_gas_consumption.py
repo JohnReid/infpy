@@ -51,14 +51,14 @@ def show_kernel_predictions(k):
     gp = infpy.gp.GaussianProcess(gp_X, gp_Y, k)
     pylab.clf()
     infpy.gp.gp_1D_predict(gp, x_max=predict_max, new_figure=False)
-    print 'Parameters: %s\nLL: %f' % (str(gp.k.params), gp.LL)
+    print('Parameters: %s\nLL: %f' % (str(gp.k.params), gp.LL))
 
 
 def learn_kernel_parameters(k):
     # Create a gaussian process
     gp = infpy.gp.GaussianProcess(gp_X, gp_Y, k)
     infpy.gp.gp_learn_hyperparameters(gp)
-    print 'Parameters: %s\nLL: %f' % (str(gp.k.params), gp.LL)
+    print('Parameters: %s\nLL: %f' % (str(gp.k.params), gp.LL))
 # <demo> --- stop ---
 
 

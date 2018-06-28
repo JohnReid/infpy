@@ -6,9 +6,9 @@ import unittest
 
 
 def suite():
-    import decision_test
-    import genepy_test
-    import rule_test
+    from . import decision_test
+    from . import genepy_test
+    from . import rule_test
     suite = unittest.TestSuite()
     suite.addTests(
         unittest.defaultTestLoader.loadTestsFromModule(decision_test))

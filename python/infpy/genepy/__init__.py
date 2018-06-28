@@ -6,4 +6,4 @@
 genepy - genetic algorithms in python
 """
 
-from population import *
+from .population import *

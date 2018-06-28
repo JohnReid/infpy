@@ -47,7 +47,7 @@ logging.info('Tolerance in LL: %e', LL_tolerance)
 max_iters = 50
 convergence_test = LlConvergenceTest(
     eps=LL_tolerance, use_absolute_difference=True)
-for i in xrange(max_iters):
+for i in range(max_iters):
     dist.update()
     history.update()
     LL = dist.log_likelihood()

@@ -617,8 +617,8 @@ if '__main__' == __name__:
     mu2 = factor_graph.add_variable(Variable())
     gamma2 = factor_graph.add_variable(Variable())
     K = 5
-    xs = [factor_graph.add_variable(Variable()) for i in xrange(K)]
-    _lambdas = [factor_graph.add_variable(Variable()) for i in xrange(K)]
+    xs = [factor_graph.add_variable(Variable()) for i in range(K)]
+    _lambdas = [factor_graph.add_variable(Variable()) for i in range(K)]
     for x, _lambda in zip(xs, _lambdas):
         factor_graph.add_factor(
             FactorMixture(
@@ -675,18 +675,18 @@ if '__main__' == __name__:
     variational_updater = VariationalUpdater(factor_graph, var_dists)
     convergence_test = LlConvergenceTest()
     L = variational_updater.L()
-    print 'log P(D) >= %f' % L
+    print('log P(D) >= %f' % L)
     convergence_test(L)
-    for i in xrange(40):
-        print '************** Update %3d **************' % i
+    for i in range(40):
+        print('************** Update %3d **************' % i)
         variational_updater.update_all()
         L = variational_updater.L()
-        print 'log P(D) >= %f' % L
+        print('log P(D) >= %f' % L)
         for i, _lambda in enumerate(_lambdas):
-            print 'lambda_%i: %s' % (i, var_dists[_lambda].parameters)
-        print 'mu1   : expected = %f; precision = %f' % (
-            FactorGaussian.extract_parameters(var_dists[mu1].parameters))
-        print 'mu2   : expected = %f; precision = %f' % (
-            FactorGaussian.extract_parameters(var_dists[mu2].parameters))
+            print('lambda_%i: %s' % (i, var_dists[_lambda].parameters))
+        print('mu1   : expected = %f; precision = %f' % (
+            FactorGaussian.extract_parameters(var_dists[mu1].parameters)))
+        print('mu2   : expected = %f; precision = %f' % (
+            FactorGaussian.extract_parameters(var_dists[mu2].parameters)))
         if convergence_test(L):
             break

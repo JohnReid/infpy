@@ -104,7 +104,7 @@ def test_triangulation():
     g = bgl.Graph()
     labels = g.add_vertex_property(name='label', type='string')
     styles = g.add_edge_property(name='style', type='string')
-    vs = [g.add_vertex() for i in xrange(5)]
+    vs = [g.add_vertex() for i in range(5)]
     for i, v in enumerate(vs):
         labels[v] = '%d' % i
     g.add_edge(vs[0], vs[1])
@@ -398,7 +398,7 @@ if '__main__' == __name__:
     # Find the maximal cliques
     #
     for clique in enumerate_maximal_cliques(var_g):
-        print ", ".join(labeller.labels[v] for v in clique)
+        print(", ".join(labeller.labels[v] for v in clique))
 
     #
     # Construct a junction tree

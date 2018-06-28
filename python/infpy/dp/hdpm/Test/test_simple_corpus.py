@@ -26,7 +26,7 @@ options, args = parse_options(parser)
 numpy.random.seed(options.seed)
 
 
-for model_idx in xrange(options.num_models_to_test):
+for model_idx in range(options.num_models_to_test):
     LL, model = infer_model(hdpm.HDPM(documents, W, K), options)
 
     # Check we explained the data using a small number of topics.

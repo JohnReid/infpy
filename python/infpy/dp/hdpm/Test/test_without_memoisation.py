@@ -45,7 +45,7 @@ assert LL_with_caching == LL_without_caching
 # Check when turning each cached function off individually
 #
 num_cachable_fns = len(create_model()._cachable_fns())
-for i in xrange(num_cachable_fns):
+for i in range(num_cachable_fns):
     model = create_seeded_model()
     model._cachable_fns()[i].set_cache_enabled(False)
     LL_with_caching = update_model(model)

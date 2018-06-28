@@ -6,7 +6,7 @@
 Implements rules to generate and modify decision trees
 """
 
-from attributes import *
+from .attributes import *
 
 from random import gauss, random, sample, randint, choice
 
@@ -91,7 +91,7 @@ def new_rule_for_attribute(attr):
     an index into some children
     """
     if isinstance(attr, EnumerativeAttribute):
-        return MembershipRule(attr, sample(xrange(attr.num_values), attr.num_values / 2)), 2
+        return MembershipRule(attr, sample(range(attr.num_values), attr.num_values / 2)), 2
 
     elif isinstance(attr, OrdinalAttribute):
         return ComparisonRule(attr, randint(0, attr.num_values - 2)), 2
@@ -122,7 +122,7 @@ def new_mutated_rule(rule, degree_of_mutation=1.0):
         # randomly remove/insert elements from rule set
         p_mutation = degree_of_mutation / rule.attr.num_values
         s = set()
-        for value in xrange(rule.attr.num_values):
+        for value in range(rule.attr.num_values):
             if (random() > p_mutation) ^ (value in rule.set):
                 s.add(value)
         return MembershipRule(rule.attr, s)

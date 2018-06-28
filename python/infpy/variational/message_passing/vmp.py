@@ -244,7 +244,7 @@ class FactorGraph(object):
 
     def _are_plates_specified(self):
         "@return: True if and only if the size of all the model's plates are specified."
-        return None not in self.plates.values()
+        return None not in list(self.plates.values())
 
     def check_plates_specified(self):
         "Raises exception if not all plates in the model have their sizes specified."
@@ -254,7 +254,7 @@ class FactorGraph(object):
 
     def variable_names(self):
         "@return: A sequence of the variable names in the model."
-        return self.variable_vertices.keys()
+        return list(self.variable_vertices.keys())
 
     def variable(self, name):
         "@return: The variable with the given name."
@@ -360,8 +360,8 @@ class LocalMessagePasser(object):
                         raise RuntimeError(
                             'Messages cannot be None. Please override create_message().')
                     self.sent[index] = msg  # remember we have sent it
-                    print 'Sending  message: %s: %s -> %s' % (
-                        msg, self._get_name(self.v), self._get_name(v))
+                    print('Sending  message: %s: %s -> %s' % (
+                        msg, self._get_name(self.v), self._get_name(v)))
                     self.msg_passer_map[v].receive_message(
                         self.v, msg)  # send it
 
@@ -446,8 +446,8 @@ class HiddenVertexMessagePasser(LocalMessagePasser):
         self.distribution[:] = self.msg_sum
         del self.msg_sum
         LocalMessagePasser.clean_up(self)
-        print 'New variational distribution: %s: %s' % (
-            self._get_name(self.v), self.distribution)
+        print('New variational distribution: %s: %s' % (
+            self._get_name(self.v), self.distribution))
 
 
 class FactorVertexMessagePasser(LocalMessagePasser):
@@ -528,8 +528,8 @@ class VariationalUpdater(object):
                 self.var_dist[name],
                 self.model.names
             )
-        print args
-        print kwargs
+        print(args)
+        print(kwargs)
 
     def _create_msg_handler_for(self, g, v, msg_passer_map):
         data = self.model.data[v]

@@ -3,8 +3,8 @@
 #
 
 
-from kernel import *
-from real_kernel import *
+from .kernel import *
+from .real_kernel import *
 import numpy
 import math
 

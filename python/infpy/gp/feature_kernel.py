@@ -2,7 +2,7 @@
 # Copyright John Reid 2006
 #
 
-from kernel import *
+from .kernel import *
 import numpy
 
 

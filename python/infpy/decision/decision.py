@@ -6,7 +6,7 @@
 Implementation of a decision tree
 """
 
-from rule_generation import new_rule, new_mutated_rule, only_possible_outcome
+from .rule_generation import new_rule, new_mutated_rule, only_possible_outcome
 from random import choice, shuffle, random, randint
 
 
@@ -51,7 +51,7 @@ class LeafNode(object):
 
 
 def print_tree(tree, indent=0):
-    print '%s%s' % (' ' * indent, str(tree))
+    print('%s%s' % (' ' * indent, str(tree)))
     if isinstance(tree, DecisionNode):
         for c in tree.children:
             print_tree(c, indent + 1)
@@ -99,7 +99,7 @@ def create_random_decision_tree(context, depth):
     else:
         rule, num_outcomes = new_rule(context.attributes)
         children = [
-            create_random_decision_tree(context, depth - 1) for i in xrange(num_outcomes)
+            create_random_decision_tree(context, depth - 1) for i in range(num_outcomes)
         ]
         return DecisionNode(rule, children)
 

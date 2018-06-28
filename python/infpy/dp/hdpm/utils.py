@@ -90,8 +90,8 @@ def log_stack_simple(level=logging.INFO, limit=None, tag=None):
 def check_stack_for_multiple_calculates():
     "Examines stacks to see if we have called a _calculate_ function recursively. For debugging purposes."
     import traceback
-    stack = list(filter(lambda e: e[2].startswith(
-        '_calculate_'), traceback.extract_stack()))
+    stack = list([e for e in traceback.extract_stack() if e[2].startswith(
+        '_calculate_')])
     if len(stack) > 1:
         log_stack()
         1 / 0

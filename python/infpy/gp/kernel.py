@@ -79,7 +79,7 @@ class Kernel(object):
             self.__class__.Derivative
             self.derivatives = [
                 self.__class__.Derivative(self, i)
-                for i in xrange(len(params))
+                for i in range(len(params))
             ]
         except:
             pass
@@ -129,7 +129,7 @@ class Kernel(object):
 
         If identical == True x1 and x2 are the same sample
         """
-        raise RuntimeError, 'Kernel.__call__() should be implemented in sub-class'
+        raise RuntimeError('Kernel.__call__() should be implemented in sub-class')
 
     def derivative_wrt_param(self, i):
         """
@@ -252,4 +252,4 @@ def noise_kernel(sigma=1.0, sigma_prior=infpy.LogNormalDistribution()):
     return IdenticalKernel() * ConstantSquaredKernel(sigma, sigma_prior)
 
 
-from sum_kernel import *
+from .sum_kernel import *

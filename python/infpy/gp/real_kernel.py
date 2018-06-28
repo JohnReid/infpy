@@ -2,7 +2,7 @@
 # Copyright John Reid 2006, 2012
 #
 
-from kernel import *
+from .kernel import *
 
 
 class RealKernel(Kernel):

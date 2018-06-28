@@ -22,7 +22,7 @@ class ZeroMeanUnityVarianceTest(unittest.TestCase):
     def test(self):
         Y = [
             numpy.random.uniform(size=4)
-            for i in xrange(5)
+            for i in range(5)
         ]
         Scaled = []
         Revert = []

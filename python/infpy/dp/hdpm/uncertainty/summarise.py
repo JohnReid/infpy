@@ -8,7 +8,7 @@ Code to summarise inference and output of HDPM.
 
 from cookbook.pylab_utils import pylab_ioff
 from cookbook.dicts import DictOf
-from itertools import imap
+
 from ..summarise import heatmap_categories
 import logging
 import numpy
@@ -56,16 +56,16 @@ class Statistics(object):
         )
 
     def log(self, level=logging.INFO):
-        for k in xrange(self.num_topics_used):
+        for k in range(self.num_topics_used):
             logging.log(level, "Genes for topic % 2d: %s",
                         k, str(self.genes_for_topic(k)))
-        for g in xrange(self.hdpm.data.G):
+        for g in range(self.hdpm.data.G):
             logging.log(level, "Topics for gene % 2d: %s",
                         g, str(self.topics_for_gene(g)))
-        for k in xrange(self.num_topics_used):
+        for k in range(self.num_topics_used):
             logging.log(level, "Factors for topic % 2d: %s",
                         k, str(self.factors_for_topic(k)))
-        for f in xrange(self.hdpm.data.F):
+        for f in range(self.hdpm.data.F):
             logging.log(level, "Topics for factor % 2d: %s",
                         f, str(self.topics_for_factor(f)))
 
@@ -87,30 +87,30 @@ class Statistics(object):
 
     def num_topics_per_gene(self):
         "@return: The number of topics per gene."
-        return [len(self.topics_for_gene(g)) for g in xrange(self.hdpm.data.G)]
+        return [len(self.topics_for_gene(g)) for g in range(self.hdpm.data.G)]
 
     def num_genes_per_topic(self):
         "@return: The number of genes per topic."
-        return [len(self.genes_for_topic(k)) for k in xrange(self.num_topics_used)]
+        return [len(self.genes_for_topic(k)) for k in range(self.num_topics_used)]
 
     def num_factors_per_topic(self):
         "@return: The number of factors per topic."
-        return [len(self.factors_for_topic(k)) for k in xrange(self.num_topics_used)]
+        return [len(self.factors_for_topic(k)) for k in range(self.num_topics_used)]
 
     def num_topics_per_factor(self):
         "@return: The number of topics per factor."
-        return [len(self.topics_for_factor(f)) for f in xrange(self.hdpm.data.F)]
+        return [len(self.topics_for_factor(f)) for f in range(self.hdpm.data.F)]
 
     def genes_for_top_topics(self, k):
         "@return: The genes associated with the topics above index k."
         genes = set()
-        for k2 in xrange(k, self.num_topics_used):
+        for k2 in range(k, self.num_topics_used):
             genes.update(self.genes_for_topic(k2))
         return genes
 
     def num_genes_by_top_topics(self):
         "@return: The number of genes associated with the top topics."
-        return map(len, imap(self.genes_for_top_topics, xrange(self.num_topics_used)))
+        return list(map(len, map(self.genes_for_top_topics, range(self.num_topics_used))))
 
 
 class InferenceHistory(object):
@@ -152,17 +152,17 @@ class InferenceHistory(object):
         "A dictionary of dictionaries. Top level keys are plot names, second level keys are stats in that plot."
 
     def update(self):
-        for _plot, stats in self.stats.iteritems():
-            for name, fn in stats.iteritems():
+        for _plot, stats in self.stats.items():
+            for name, fn in stats.items():
                 self.history[name].append(fn())
         return self.history['log likelihood'][-1]
 
     @pylab_ioff
     def make_plots(self, directory, formats=('png',)):
         import pylab as P
-        for plot, stats in self.stats.iteritems():
+        for plot, stats in self.stats.items():
             P.figure()
-            for name, _fn in stats.iteritems():
+            for name, _fn in stats.items():
                 P.plot(self.history[name], label=name)
             P.legend(loc='upper left')
             for format in formats:
@@ -201,9 +201,9 @@ class Summariser(object):
         """
 
         if None == gene_ids:
-            gene_ids = [str(i) for i in xrange(hdpm.data.G)]
+            gene_ids = [str(i) for i in range(hdpm.data.G)]
         if None == factor_ids:
-            factor_ids = [str(i) for i in xrange(hdpm.data.F)]
+            factor_ids = [str(i) for i in range(hdpm.data.F)]
 
         self.hdpm = hdpm
         "The Dirichlet process mixture."
@@ -243,7 +243,7 @@ class Summariser(object):
         self.topic_sizes()
         self.histograms()
 
-        for k in xrange(self.statistics.num_topics_used):
+        for k in range(self.statistics.num_topics_used):
             self.log_topic_info(k)
             self.plot_factor_enrichment(k)
 
@@ -364,8 +364,8 @@ class Summariser(object):
         phi = self.hdpm.exp_phi()
         K = self.statistics.num_topics_used
         Z = numpy.empty((K, K))
-        for k1 in xrange(K):
-            for k2 in xrange(K):
+        for k1 in range(K):
+            for k2 in range(K):
                 Z[k1, k2] = discrete_KL(phi[k1], phi[k2])
         #self.imshow(Z, '%s-KL' % self.topic_tag, size=20, interpolation='nearest')
         self.pcolor(Z, '%s-KL' % self.topic_tag)
@@ -375,10 +375,10 @@ class Summariser(object):
         "Make a heat map representing the distances between transcriptional programs."
         K = self.statistics.num_topics_used
         factors = [set(self.statistics.factors_for_topic(k))
-                   for k in xrange(K)]
+                   for k in range(K)]
         Z = numpy.zeros((K, K))
-        for k1 in xrange(K):
-            for k2 in xrange(K):
+        for k1 in range(K):
+            for k2 in range(K):
                 if len(factors[k2]):
                     Z[k1, k2] = 1. - \
                         len(factors[k1].intersection(factors[k2])
@@ -391,10 +391,10 @@ class Summariser(object):
     def make_topic_gene_intersection_heat_map(self):
         "Make a heat map representing the distances between transcriptional programs."
         K = self.statistics.num_topics_used
-        genes = [set(self.statistics.genes_for_topic(k)) for k in xrange(K)]
+        genes = [set(self.statistics.genes_for_topic(k)) for k in range(K)]
         Z = numpy.zeros((K, K))
-        for k1 in xrange(K):
-            for k2 in xrange(K):
+        for k1 in range(K):
+            for k2 in range(K):
                 if len(genes[k2]):
                     Z[k1, k2] = 1. - \
                         len(genes[k1].intersection(genes[k2])) / \
@@ -410,7 +410,7 @@ class Summariser(object):
         import pylab as P
         P.figure()
         heatmap_categories(self.hdpm.exp_phi()[
-                           :K], category_names=self.factor_ids, distribution_names=map(str, range(K)))
+                           :K], category_names=self.factor_ids, distribution_names=list(map(str, list(range(K)))))
         self.save_fig('expected-phi')
         P.close()
 
@@ -424,8 +424,8 @@ class Summariser(object):
             gene_ids = self.gene_ids
         else:
             gene_ids = None
-        heatmap_categories(self.hdpm.exp_theta()[:, :K], category_names=map(
-            str, range(K)), distribution_names=gene_ids)
+        heatmap_categories(self.hdpm.exp_theta()[:, :K], category_names=list(map(
+            str, list(range(K)))), distribution_names=gene_ids)
         self.save_fig('expected-theta')
         P.close()
 
@@ -562,7 +562,7 @@ class Summariser(object):
             k, len(self.statistics.factors_for_topic(k)), self.factor_tag))
 
         P.subplot(211)
-        P.bar(range(self.hdpm.data.F), self.hdpm.counts.n_kf.E[k])
+        P.bar(list(range(self.hdpm.data.F)), self.hdpm.counts.n_kf.E[k])
         P.title('Expected number %ss by %s.' %
                 (self.site_tag, self.factor_tag))
 
@@ -570,7 +570,7 @@ class Summariser(object):
         phi = self.hdpm.exp_phi()[:self.statistics.num_topics_used]
         Phi = self.hdpm.exp_Phi()
         phi_ratio = phi / Phi
-        P.bar(range(self.hdpm.data.F), phi_ratio[k])
+        P.bar(list(range(self.hdpm.data.F)), phi_ratio[k])
         P.title('Enrichment ratio over background %s distribution' %
                 self.factor_tag)
 

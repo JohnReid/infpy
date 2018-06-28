@@ -7,7 +7,7 @@ Code to test mixtures.
 """
 
 import unittest
-import beta_test
+from . import beta_test
 
 
 def suite():

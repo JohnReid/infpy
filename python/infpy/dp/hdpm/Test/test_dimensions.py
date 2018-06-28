@@ -50,5 +50,5 @@ for D, d, K, W in (
 ):
     logging.info('D=%3d; d=%3d; K=%3d; W=%3d', D, d, K, W)
     model = create_model(D, d, K, W)
-    for i in xrange(3):
+    for i in range(3):
         model.update()

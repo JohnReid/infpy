@@ -14,6 +14,7 @@ from scipy.stats import beta
 from infpy.exp import DirichletExpFamily
 #import infpy.exp; reload(infpy.exp)
 from infpy.convergence_test import LlConvergenceTest
+from functools import reduce
 
 if __debug__:
     def debug_if_infinite(x):
@@ -105,29 +106,29 @@ class VariationalDistribution(object):
         expected_component_sizes = -self.phi.sum(axis=0)
         permutation = expected_component_sizes.argsort()
         new_phi = empty_like(self.phi)
-        for n in xrange(self.N):
-            for k in xrange(self.K):
+        for n in range(self.N):
+            for k in range(self.K):
                 new_phi[n, k] = self.phi[n, permutation[k]]
         self.phi = new_phi
         new_tau = empty_like(self.tau)
-        for k in xrange(self.K):
+        for k in range(self.K):
             new_tau[k] = self.tau[permutation[k]]
         self.tau = new_tau
         expected_component_sizes = self.phi.sum(axis=0)
-        for k in xrange(self.K - 1):
+        for k in range(self.K - 1):
             assert expected_component_sizes[k] >= expected_component_sizes[k + 1]
 
     def _update_gamma(self):
         "Update the gamma parameters."
         self.gamma[:, 0] = 1. + self.phi.sum(axis=0)[:-1]
-        for i in xrange(self.K - 1):
+        for i in range(self.K - 1):
             self.gamma[i, 1] = self.alpha + self.phi[:, i + 1:].sum()
         self._check_finite()
 
     def _update_tau(self):
         "Update the tau parameters."
         #import IPython; IPython.Debugger.Pdb().set_trace()
-        for i in xrange(self.K):
+        for i in range(self.K):
             self.tau[i, :self.d] = self._lambda[:self.d] + self.phi[:, i].sum()
             self.tau[i, self.d:] = self._lambda[self.d:] + \
                 sum(phi * x for x, phi in zip(self.X, self.phi[:, i]))
@@ -150,7 +151,7 @@ class VariationalDistribution(object):
         # calculate all we can before we visit each datum
         exp_log_v_i, exp_log_one_minus_v_i = self._log_v_expectations()
         sum_E_log_1_minus_Vj = array(
-            [exp_log_one_minus_v_i[:i].sum() for i in xrange(self.K)])
+            [exp_log_one_minus_v_i[:i].sum() for i in range(self.K)])
 
         # expected values of the log normalisation factors
         exp_log_norm = array(
@@ -164,7 +165,7 @@ class VariationalDistribution(object):
 
         # for each datum reestimate phi
         #import IPython; IPython.Debugger.Pdb().set_trace()
-        for n in xrange(self.N):
+        for n in range(self.N):
             E = partial_E.copy() + dot(exp_eta[:, self.d:], self.X[n])
             E_exp = exp(E - E.max())  # scale to avoid numerical errors
             self.phi[n, :] = E_exp / E_exp.sum()
@@ -186,25 +187,25 @@ class VariationalDistribution(object):
         last_LL = self._last_LL
         self._update_tau()
         if VariationalDistribution._debug_LL and self.log_likelihood() < last_LL:
-            print 'Tau update decreased LL by %.3f' % (last_LL - self._last_LL)
+            print('Tau update decreased LL by %.3f' % (last_LL - self._last_LL))
 
         last_LL = self._last_LL
         self._update_phi()
         if VariationalDistribution._debug_LL and self.log_likelihood() < last_LL:
-            print 'Phi update decreased LL by %.3f' % (last_LL - self._last_LL)
+            print('Phi update decreased LL by %.3f' % (last_LL - self._last_LL))
 
         if VariationalDistribution._do_order_updates:
             last_LL = self._last_LL
             self._update_order()
             if VariationalDistribution._debug_LL and self.log_likelihood() < last_LL:
-                print 'Order update decreased LL by %.3f' % (
-                    last_LL - self._last_LL)
+                print('Order update decreased LL by %.3f' % (
+                    last_LL - self._last_LL))
 
         last_LL = self._last_LL
         self._update_gamma()
         if VariationalDistribution._debug_LL and self.log_likelihood() < last_LL:
-            print 'Gamma update decreased LL by %.3f' % (
-                last_LL - self._last_LL)
+            print('Gamma update decreased LL by %.3f' % (
+                last_LL - self._last_LL))
 
         # calculate LL if haven't done already for checks
         if not VariationalDistribution._debug_LL:
@@ -227,29 +228,29 @@ class VariationalDistribution(object):
         alpha_eta = dirichlet.eta([self.alpha, 1.])
         # this if for the K'th V_i
         LL += gammaln(1. + self.alpha) - gammaln(self.alpha)
-        for i in xrange(self.K - 1):  # for the first K-1 Vs
+        for i in range(self.K - 1):  # for the first K-1 Vs
             eta = dirichlet.eta(self.gamma[i])
             LL -= dirichlet.KL(eta, alpha_eta)
         if __debug__:
             debug_if_infinite(LL)
 
         # KL for distributions over eta
-        for i in xrange(self.K):
+        for i in range(self.K):
             LL -= self.conj_prior.prior.KL(self.tau[i], self._lambda)
         if __debug__:
             debug_if_infinite(LL)
 
         # LL for distributions over Z
-        for n in xrange(self.N):
-            for i in xrange(self.K - 1):
+        for n in range(self.N):
+            for i in range(self.K - 1):
                 LL += self.phi[n, i + 1:].sum() * exp_log_one_minus_v_i[i]
                 LL += self.phi[n, i] * exp_log_v_i[i]
         if __debug__:
             debug_if_infinite(LL)
 
         # LL for x
-        for n in xrange(self.N):
-            for i in xrange(self.K):
+        for n in range(self.N):
+            for i in range(self.K):
                 phi = self.phi[n, i]
                 if 0.0 != phi:
                     LL += phi * (
@@ -292,7 +293,7 @@ class VariationalDistribution(object):
         # calculate chance of data given each component parameters
         predictive_component = exp(
             [self.conj_prior.log_conjugate_predictive(
-                x, self.tau[k]) for k in xrange(self.K)]
+                x, self.tau[k]) for k in range(self.K)]
         )
         if __debug__:
             debug_if_infinite(predictive_component)
@@ -313,10 +314,10 @@ def polya_urn(N, alpha):
     from numpy.random import multinomial
     assert alpha >= 0.
     counts = []
-    for n in xrange(N):
+    for n in range(N):
         k = len(counts)  # number of different samples so far
         multi_param = array([k == i and alpha or counts[i]
-                             for i in xrange(k + 1)]) / (n + alpha)
+                             for i in range(k + 1)]) / (n + alpha)
         # get the index of the 1 in the multinomial sample
         sample = where(multinomial(1, multi_param))[0][0]
         # print multi_param, multi_sample, sample
@@ -345,7 +346,7 @@ def generate_test_data(N, alpha, conjugate_prior, tau):
     # sample the data
     X = empty((N, conjugate_prior.likelihood.dimension))
     n = 0
-    for i in xrange(K):  # for each component
+    for i in range(K):  # for each component
         X[n:n + counts[i]
           ] = conjugate_prior.likelihood.sample(eta[i], size=counts[i])
         n += counts[i]
@@ -372,8 +373,8 @@ if '__main__' == __name__:
         def generate_test_data(self):
             self.counts, self.eta, self.X = generate_test_data(
                 self.N, self.alpha, self.conj_prior, self.tau)
-            print '%d data comes from %d components partitioned as %s' % (
-                len(self.X), len(self.counts), str(self.counts))
+            print('%d data comes from %d components partitioned as %s' % (
+                len(self.X), len(self.counts), str(self.counts)))
             self.components = []  # the components for each datum
             for i, c in enumerate(self.counts):
                 self.components.extend([i] * c)
@@ -389,7 +390,7 @@ if '__main__' == __name__:
             )
 
         def plot(self):
-            print 'LL: %f' % self.var_dist.log_likelihood()
+            print('LL: %f' % self.var_dist.log_likelihood())
 
     class MvnTestCase(DpTestCase):
         def __init__(self, N, alpha, K):
@@ -409,7 +410,7 @@ if '__main__' == __name__:
 
         def var_dist_info(self):
             mus = []
-            for i in xrange(self.var_dist.K):
+            for i in range(self.var_dist.K):
                 nu, S, kappa_0, mu_0 = self.var_dist.conj_prior.prior.theta(
                     self.var_dist.tau[i])
                 #print 'mu_%d: %s' % (i, str(mu_0))
@@ -417,16 +418,16 @@ if '__main__' == __name__:
                 mus.append(mu_0)
                 sigma = inv(nu * kappa_0 * S)
                 w, v = eig(sigma)  # plot the covariance
-                for j in xrange(2):
+                for j in range(2):
                     evec = w[j] * v[:, j]
                     plot([mu_0[0] - evec[0], mu_0[0] + evec[0]], [mu_0[1] -
                                                                   evec[1], mu_0[1] + evec[1]], color=DpTestCase.colours[i])
 
             p_v = self.var_dist.gamma[:, 0] / self.var_dist.gamma.sum(axis=1)
             stick_lengths = zeros((self.var_dist.K))
-            for i in xrange(self.var_dist.K - 1):
+            for i in range(self.var_dist.K - 1):
                 stick_lengths[i] = p_v[i] * \
-                    reduce(float.__mul__, (1. - p_v[j] for j in xrange(i)), 1.)
+                    reduce(float.__mul__, (1. - p_v[j] for j in range(i)), 1.)
             stick_lengths[-1] = 1. - stick_lengths.sum()
             #print 'Stick lengths: %s' % str(stick_lengths)
             #import IPython; IPython.Debugger.Pdb().set_trace()
@@ -444,7 +445,7 @@ if '__main__' == __name__:
 
         def plot_phi(self):
             a = axes([.9, .9, .1, .1], axisbg='w')
-            rects = bar(xrange(self.var_dist.K), self.var_dist.phi.sum(
+            rects = bar(range(self.var_dist.K), self.var_dist.phi.sum(
                 axis=0), color=DpTestCase.colours[:self.var_dist.K])
             title("Components")
             setp(a, xticks=[], yticks=[])
@@ -457,9 +458,9 @@ if '__main__' == __name__:
             range1 = arange(ymin, ymax + ystep / 100., step=ystep)
             mesh0, mesh1 = meshgrid(range0, range1)
             z = empty(mesh0.shape)
-            print xstep, ystep, range0[-1], range1[-1]
-            for i0 in xrange(len(z)):
-                for i1 in xrange(len(z[0])):
+            print(xstep, ystep, range0[-1], range1[-1])
+            for i0 in range(len(z)):
+                for i1 in range(len(z[0])):
                     T = self.conj_prior.likelihood.T(
                         array([mesh0[i0, i1], mesh1[i0, i1]]))
                     z[i0, i1] = self.var_dist.predictive(T)
@@ -492,7 +493,7 @@ if '__main__' == __name__:
 
         def var_dist_info(self):
             mus = []
-            for i in xrange(self.var_dist.K):
+            for i in range(self.var_dist.K):
                 nu, S, kappa_0, mu_0 = self.var_dist.conj_prior.prior.theta(
                     self.var_dist.tau[i])
                 #print 'mu_%d: %s' % (i, str(mu_0))
@@ -500,16 +501,16 @@ if '__main__' == __name__:
                 mus.append(mu_0)
                 sigma = inv(nu * kappa_0 * S)
                 w, v = eig(sigma)  # plot the covariance
-                for j in xrange(2):
+                for j in range(2):
                     evec = w[j] * v[:, j]
                     plot([mu_0[0] - evec[0], mu_0[0] + evec[0]], [mu_0[1] -
                                                                   evec[1], mu_0[1] + evec[1]], color=DpTestCase.colours[i])
 
             p_v = self.var_dist.gamma[:, 0] / self.var_dist.gamma.sum(axis=1)
             stick_lengths = zeros((self.var_dist.K))
-            for i in xrange(self.var_dist.K - 1):
+            for i in range(self.var_dist.K - 1):
                 stick_lengths[i] = p_v[i] * \
-                    reduce(float.__mul__, (1. - p_v[j] for j in xrange(i)), 1.)
+                    reduce(float.__mul__, (1. - p_v[j] for j in range(i)), 1.)
             stick_lengths[-1] = 1. - stick_lengths.sum()
             #print 'Stick lengths: %s' % str(stick_lengths)
             #import IPython; IPython.Debugger.Pdb().set_trace()
@@ -546,11 +547,11 @@ if '__main__' == __name__:
     from time import time
     start = time()
     max_iters = 30
-    for i in xrange(max_iters):
+    for i in range(max_iters):
         LL = test_case.var_dist.update()
         test_case.plot()
         if convergence_test(LL):
             break
     total_elapsed = time() - start
-    print '%d iterations took %f secs, %f secs/iteration' % (
-        i + 1, total_elapsed, total_elapsed / i + 1)
+    print('%d iterations took %f secs, %f secs/iteration' % (
+        i + 1, total_elapsed, total_elapsed / i + 1))

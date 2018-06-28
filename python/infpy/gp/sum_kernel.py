@@ -3,7 +3,7 @@
 #
 
 
-from kernel import *
+from .kernel import *
 import infpy
 import numpy
 import math
@@ -52,7 +52,7 @@ class IndexMixer(object):
             self.mixer = mixer
             self.i = 0
 
-        def next(self):
+        def __next__(self):
             self.i += 1
             if self.i > len(self.mixer):
                 raise StopIteration

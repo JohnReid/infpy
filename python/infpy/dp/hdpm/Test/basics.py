@@ -56,7 +56,7 @@ def infer_model(model, options):
 
     convergence_test = LlConvergenceTest(
         eps=options.LL_tolerance, should_increase=False, use_absolute_difference=True)
-    for iter in xrange(options.max_iters):
+    for iter in range(options.max_iters):
         model.update()
         LL = model.log_likelihood()
         logging.debug('Iteration % 2d: LL=%f', iter, LL)

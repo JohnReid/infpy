@@ -30,7 +30,7 @@ def log_factorial(k):
 
 
 def pre_compute_log_factorial(N):
-    for i in xrange(50, N, 50):
+    for i in range(50, N, 50):
         log_factorial(i)
 
 
@@ -106,7 +106,7 @@ class BetaTest(unittest.TestCase):
         last_LL = None
         logging.info('Variational bound at start = %f',
                      mixture.variational_bound())
-        for _i in xrange(self.options.max_iter):
+        for _i in range(self.options.max_iter):
             if None == last_LL:
                 last_LL = mixture.variational_bound_piecewise()
                 convergence_test(last_LL.sum())
@@ -144,7 +144,7 @@ class BetaTest(unittest.TestCase):
                      type(self).__name__)
         self.options.point_estimates = False
         first_seed = 1
-        for seed in xrange(first_seed, first_seed + self.num_starts):
+        for seed in range(first_seed, first_seed + self.num_starts):
             logging.info('Seeding numpy.random with %d', seed)
             np.random.seed(seed)
 
@@ -169,7 +169,7 @@ class BetaTest(unittest.TestCase):
         logging.info('Testing with point estimates : %s', type(self).__name__)
         self.options.point_estimates = True
         first_seed = 1
-        for seed in xrange(first_seed, first_seed + self.num_starts):
+        for seed in range(first_seed, first_seed + self.num_starts):
             logging.info('Seeding numpy.random with %d', seed)
             np.random.seed(seed)
 
@@ -193,7 +193,7 @@ class BetaTest(unittest.TestCase):
         self.options.point_estimates = True
         self.options.stick_breaking = True
         first_seed = 6
-        for seed in xrange(first_seed, first_seed + self.num_starts):
+        for seed in range(first_seed, first_seed + self.num_starts):
             logging.info('Seeding numpy.random with %d', seed)
             np.random.seed(seed)
 
@@ -218,7 +218,7 @@ class BetaTest(unittest.TestCase):
         self.options.stick_breaking = False
         self.options.integrate_pi = True
         first_seed = 1
-        for seed in xrange(first_seed, first_seed + self.num_starts):
+        for seed in range(first_seed, first_seed + self.num_starts):
             logging.info('Seeding numpy.random with %d', seed)
             np.random.seed(seed)
 
@@ -245,7 +245,7 @@ class BetaTest(unittest.TestCase):
         self.options.stick_breaking = True
         self.options.integrate_pi = True
         first_seed = 1
-        for seed in xrange(first_seed, first_seed + self.num_starts):
+        for seed in range(first_seed, first_seed + self.num_starts):
             logging.info('Seeding numpy.random with %d', seed)
             np.random.seed(seed)
 
@@ -503,7 +503,7 @@ class ApproxTest(unittest.TestCase):
         """
         expectation = 0.
         total_prob = 0.
-        for k in xrange(N + 1):
+        for k in range(N + 1):
             sum = binomial_coefficient(N, k)
             prob = sum * p**k * (1 - p)**(N - k)
             total_prob += prob

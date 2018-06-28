@@ -18,7 +18,7 @@ def accumulate_vector(x):
     """
     result = numpy.empty_like(x)
     result[0] = x[0]
-    for i in xrange(1, len(x)):
+    for i in range(1, len(x)):
         result[i] = result[i - 1] + x[i]
     return result
 
@@ -88,7 +88,7 @@ def _greater_than(a):
     "Return an array like the argument a, where each entry is the sum of the later entries in the original array"
     result = numpy.empty_like(a)
     result[-1] = 0.
-    for k in xrange(len(a) - 1):
+    for k in range(len(a) - 1):
         result[-2 - k] = result[-1 - k] + a[-1 - k]
     return result
 

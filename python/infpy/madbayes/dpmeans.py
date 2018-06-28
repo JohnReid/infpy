@@ -82,7 +82,7 @@ def dpmeans(x, lambda_, progress_plots=False):
         logging.info('Iteration %d: have %d cluster(s)', i, int(z.max() + 1))
 
         # calculate cluster means
-        mu = [numpy.mean(x[z == k], axis=0) for k in xrange(int(z.max() + 1))]
+        mu = [numpy.mean(x[z == k], axis=0) for k in range(int(z.max() + 1))]
 
         for n, xn in enumerate(x):
             d2 = numpy.array([((xn - muk)**2).sum() for muk in mu])

@@ -211,7 +211,7 @@ class RealKernelTest(unittest.TestCase):
                     k.set_params(p)
                     return numpy.asarray([
                         k.derivative_wrt_param(i)(x1, x2)
-                        for i in xrange(len(p))
+                        for i in range(len(p))
                     ])
 
                 try:
@@ -219,10 +219,10 @@ class RealKernelTest(unittest.TestCase):
                     infpy.check_gradients(f, fprime, params)
 
                 except:
-                    print 'Problem with %s' % str(k)
-                    print 'Parameters = %s' % str(params)
-                    print 'x1 = %s' % str(x1)
-                    print 'x2 = %s' % str(x2)
+                    print('Problem with %s' % str(k))
+                    print('Parameters = %s' % str(params))
+                    print('x1 = %s' % str(x1))
+                    print('x2 = %s' % str(x2))
                     raise
 
 

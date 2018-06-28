@@ -85,7 +85,7 @@ class ExpFamilyDP(object):
                 self.lambda_[0],
                 self.lambda_[1]
             )
-            for i in xrange(self.K)
+            for i in range(self.K)
         ]
         # assign each data point to the mixtures according to random phi
         for n in range(self.N):
@@ -95,7 +95,7 @@ class ExpFamilyDP(object):
                         (len(self.data[n]), len(self.lambda_[1]))
                     )
                 )
-            for i in xrange(self.K):
+            for i in range(self.K):
                 self.tau[i] = (
                     self.tau[i][0] + self.phi[n, i],
                     self.tau[i][1] + self.phi[n, i] * self.data[n]
@@ -132,11 +132,11 @@ class ExpFamilyDP(object):
     def update_gamma(self):
         """Update gamma"""
         #LL = self._get_LL_check()
-        for i in xrange(self.K - 1):
+        for i in range(self.K - 1):
             self.gamma[i, 0] = 1.0 + sum(
                 [
                     self.phi[n, i]
-                    for n in xrange(self.N)
+                    for n in range(self.N)
                 ]
             )
             self.gamma[i, 1] = self.alpha + sum(
@@ -144,10 +144,10 @@ class ExpFamilyDP(object):
                     sum(
                         [
                             self.phi[n, j]
-                            for j in xrange(i + 1, self.K)
+                            for j in range(i + 1, self.K)
                         ]
                     )
-                    for n in xrange(self.N)
+                    for n in range(self.N)
                 ]
             )
         # print 'Gamma:\n', self.gamma
@@ -157,21 +157,21 @@ class ExpFamilyDP(object):
     def update_tau(self):
         """Update tau"""
         #LL = self._get_LL_check()
-        for i in xrange(self.K):
+        for i in range(self.K):
             # each tau is a tuple of the pseudo count and a vector
             self.tau[i] = (
                 self.lambda_[0] + sum(
                     [
                         self.phi[n, i]
                         for n
-                        in xrange(self.N)
+                        in range(self.N)
                     ]
                 ),
                 self.lambda_[1] + sum(
                     [
                         self.phi[n, i] * self.data[n]
                         for n
-                        in xrange(self.N)
+                        in range(self.N)
                     ]
                 )
             )
@@ -182,7 +182,7 @@ class ExpFamilyDP(object):
         """Update phi."""
         #LL = self._get_LL_check()
         digamma = scipy.special.digamma
-        for i in xrange(self.K):
+        for i in range(self.K):
             # E(log V_i)
             if i == self.K - 1:
                 E_log_V_i = 0.0  # last mixture's v is always 1
@@ -201,12 +201,12 @@ class ExpFamilyDP(object):
                     digamma(self.gamma[j, 1])
                     - digamma(self.gamma[j, 0] + self.gamma[j, 1])
                     for j
-                    in xrange(i - 1)
+                    in range(i - 1)
                 ]
             )
 
             E_eta = self.family.expected_eta(self.tau[i]).T
-            for n in xrange(self.N):
+            for n in range(self.N):
                 # E(eta_i).X_n
                 E_eta_dot_X = (E_eta * self.data[n])[0, 0]
 
@@ -220,7 +220,7 @@ class ExpFamilyDP(object):
                 )
         # to cater for underflow - add constant to each row to make largest 0...
         # phi is proportional to exponent of E so is invariant to this
-        for n in xrange(self.N):
+        for n in range(self.N):
             largest = max(self.phi[n, :])
             self.phi[n, :] -= largest
         # only now take exponent
@@ -231,7 +231,7 @@ class ExpFamilyDP(object):
 
     def _normalise_phi(self):
         # normalise phi
-        for n in xrange(self.N):
+        for n in range(self.N):
             s = sum(self.phi[n, :])
             if 0.0 == s:
                 # print self.phi
@@ -248,7 +248,7 @@ class ExpFamilyDP(object):
                         self.phi[n, :]
                     )
                 )
-                for n in xrange(self.N)
+                for n in range(self.N)
             ]
         )
         # return sum(
@@ -268,7 +268,7 @@ class ExpFamilyDP(object):
         """
         result = numpy.ones(self.K, dtype=numpy.float64)
         running_product = 1.0
-        for i in xrange(self.K - 1):
+        for i in range(self.K - 1):
             factor = self._gamma_factor(i)
             result[i] = factor * running_product
             running_product *= (1.0 - factor)
@@ -287,7 +287,7 @@ class ExpFamilyDP(object):
                     infpy.exp_family.log_p_T_given_tau(
                         self.family, T, self.tau[i])
                 )
-                for i in xrange(self.K)
+                for i in range(self.K)
             ],
             dtype=numpy.float64
         )
@@ -313,7 +313,7 @@ class ExpFamilyDP(object):
         return numpy.array(
             [
                 expected_theta[i] * p_T_in_mixture[i] / total
-                for i in xrange(self.K)
+                for i in range(self.K)
             ],
             dtype=numpy.float64
         )

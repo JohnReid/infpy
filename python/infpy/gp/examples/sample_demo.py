@@ -32,7 +32,7 @@ def show_examples(examples, title):
 
 
 def multiple_draws_examples():
-    for i in xrange(4):
+    for i in range(4):
         yield SE([1]), 'function %d' % (i + 1)
 
 

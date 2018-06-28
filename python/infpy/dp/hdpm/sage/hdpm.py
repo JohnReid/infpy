@@ -1,9 +1,10 @@
+from functools import reduce
 
 D = 5
 K = 3
 W = 2
 
-eta = [var('eta_%d' % d) for d in xrange(D)]
+eta = [var('eta_%d' % d) for d in range(D)]
 
 alpha = var('alpha')
 n_d = var('n_d')
@@ -11,7 +12,7 @@ d_term = [
     eta[d] ** (alpha - 1)
     *
     (1 - eta[d]) ** n_d
-    for d in xrange(D)
+    for d in range(D)
 ]
 p_z_x = reduce(sage.symbolic.expression.Expression.__mul__, d_term)
 log_p_z_x = log(p_z_x).simplify_log()

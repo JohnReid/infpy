@@ -23,9 +23,9 @@ def pairs(iterable):
     """
     i = iter(iterable)
     try:
-        last = i.next()
+        last = next(i)
         while True:
-            this = i.next()
+            this = next(i)
             yield last, this
             last = this
     except StopIteration:
@@ -44,17 +44,17 @@ def test_pairs():
 
 def check_roc_invariants(rocs, include_endpoints=True):
     if include_endpoints:
-        print rocs[0]
+        print(rocs[0])
         assert 0. == rocs[0].sensitivity(), '0 != %.f' % rocs[0].sensitivity()
         assert 1. == rocs[0].specificity(), '1 != %.f' % rocs[0].specificity()
-        print
-        print rocs[-1]
+        print()
+        print(rocs[-1])
         assert 1. == rocs[-1].sensitivity(), '1 != %.f' % rocs[-1].sensitivity()
         assert 0. == rocs[-1].specificity(), '0 != %.f' % rocs[-1].specificity()
     for roc1, roc2 in pairs(rocs):
-        print
-        print roc1
-        print roc2
+        print()
+        print(roc1)
+        print(roc2)
         assert roc1.sensitivity() <= roc2.sensitivity()
         assert roc1.specificity() >= roc2.specificity()
 

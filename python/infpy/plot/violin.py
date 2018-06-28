@@ -34,7 +34,7 @@ def violin_plot(ax, data, pos, bp=False):
 if __name__ == "__main__":
     from matplotlib.pyplot import figure, show
     from numpy.random import normal
-    pos = range(5)
+    pos = list(range(5))
     data = [normal(size=100) for i in pos]
     fig = figure()
     ax = fig.add_subplot(111)

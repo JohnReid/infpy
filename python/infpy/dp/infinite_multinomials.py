@@ -75,7 +75,7 @@ class InfiniteMultinomial(LazyInfiniteSequence):
         "Make sure invariants aren't violated."
         assert len(self)
         assert 0. == self[0]
-        for i in xrange(self.num_partitions()):
+        for i in range(self.num_partitions()):
             assert self.partition_start(i) <= self.partition_end(i)
         assert self.last() <= 1.
 
@@ -164,7 +164,7 @@ class InfiniteDirichlet(InfiniteMultinomial):
 
 def plot_multinomials(multis, kwargs_list=None):
     "Plot multinomials next to one another."
-    K = max(map(len, multis))
+    K = max(list(map(len, multis)))
     M = len(multis)
     spacing = .3
     width = (1. - spacing) / M
@@ -172,7 +172,7 @@ def plot_multinomials(multis, kwargs_list=None):
         kwargs_list = itertools.repeat(dict())
     for n, (multi, kwargs) in enumerate(zip(multis, kwargs_list)):
         P.bar(N.arange(K) + (-width * M / 2 + n * width),
-              [multi.x(k) for k in xrange(K)], width, **kwargs)
+              [multi.x(k) for k in range(K)], width, **kwargs)
 
 
 if '__main__' == __name__:
@@ -185,31 +185,31 @@ if '__main__' == __name__:
     # Test stick breaking
     #
     stick = StickBreaker(10.)
-    for i in xrange(20):
+    for i in range(20):
         p = R.uniform()
         partition = stick.partition(p)
         logging.info('%f is in partition %d', p, partition)
 
     logging.info('Trying infinite dirichlet with stick breaking prior.')
     infinite_dirichlet = InfiniteDirichlet(1., stick)
-    for i in xrange(20):
+    for i in range(20):
         p = R.uniform()
         partition = infinite_dirichlet.partition(p)
         logging.info('%f is in partition %d', p, partition)
 
-    for partition in xrange(infinite_dirichlet.num_partitions()):
+    for partition in range(infinite_dirichlet.num_partitions()):
         logging.info('Partition %2d: stick: %.5f   infinite dirichlet: %.5f',
                      partition, stick.x(
                          partition), infinite_dirichlet.x(partition)
                      )
 
     strong_infinite_dirichlet = InfiniteDirichlet(10., stick)
-    for i in xrange(20):
+    for i in range(20):
         p = R.uniform()
         partition = strong_infinite_dirichlet.partition(p)
 
     weak_infinite_dirichlet = InfiniteDirichlet(.01, stick)
-    for i in xrange(20):
+    for i in range(20):
         p = R.uniform()
         partition = weak_infinite_dirichlet.partition(p)
 

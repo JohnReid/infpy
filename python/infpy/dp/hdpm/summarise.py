@@ -11,8 +11,8 @@ Summarise HDPM code.
 import logging
 import numpy
 import cookbook
-from itertools import imap
-from math import _greater_than
+
+from .math import _greater_than
 from cookbook import pylab_utils
 from cookbook.pylab_utils import pylab_ioff
 
@@ -83,7 +83,7 @@ def plot_categories(categories, category_names=None, distribution_names=None, nu
     ind = numpy.arange(num_dists)    # the x locations for the groups
     # the width of the bars: can also be len(x) sequence
     width = 1.
-    for c in xrange(num_categories):
+    for c in range(num_categories):
         # overlaps, subplot(111) is killed
         splt = P.subplot(numrows, numcols, c + 1)
         handles = [
@@ -208,30 +208,30 @@ class DpmStatistics(object):
 
     def num_topics_per_document(self):
         "@return: The number of topics per document."
-        return [len(self.topics_for_document(d)) for d in xrange(self.dpm.D)]
+        return [len(self.topics_for_document(d)) for d in range(self.dpm.D)]
 
     def num_documents_per_topic(self):
         "@return: The number of documents per topic."
-        return [len(self.documents_for_topic(k)) for k in xrange(self.num_topics_used)]
+        return [len(self.documents_for_topic(k)) for k in range(self.num_topics_used)]
 
     def num_words_per_topic(self):
         "@return: The number of words per topic."
-        return [len(self.words_for_topic(k)) for k in xrange(self.num_topics_used)]
+        return [len(self.words_for_topic(k)) for k in range(self.num_topics_used)]
 
     def num_topics_per_word(self):
         "@return: The number of topics per word."
-        return [len(self.topics_for_word(w)) for w in xrange(self.dpm.W)]
+        return [len(self.topics_for_word(w)) for w in range(self.dpm.W)]
 
     def documents_for_top_topics(self, k):
         "@return: The documents associated with the topics above index k."
         documents = set()
-        for k2 in xrange(k, self.num_topics_used):
+        for k2 in range(k, self.num_topics_used):
             documents.update(self.documents_for_topic(k2))
         return documents
 
     def num_documents_by_top_topics(self):
         "@return: The number of documents associated with the top topics."
-        return map(len, imap(self.documents_for_top_topics, xrange(self.num_topics_used)))
+        return list(map(len, map(self.documents_for_top_topics, range(self.num_topics_used))))
 
 
 class DpmSummariser(object):
@@ -264,9 +264,9 @@ class DpmSummariser(object):
         """
 
         if None == document_ids:
-            document_ids = [str(i) for i in xrange(dpm.D)]
+            document_ids = [str(i) for i in range(dpm.D)]
         if None == word_ids:
-            word_ids = [str(i) for i in xrange(dpm.W)]
+            word_ids = [str(i) for i in range(dpm.W)]
 
         self.dpm = dpm
         "The Dirichlet process mixture."
@@ -413,8 +413,8 @@ class DpmSummariser(object):
         phi = self.dpm.exp_phi()
         K = self.statistics.num_topics_used
         Z = numpy.empty((K, K))
-        for k1 in xrange(K):
-            for k2 in xrange(K):
+        for k1 in range(K):
+            for k2 in range(K):
                 Z[k1, k2] = discrete_KL(phi[k1], phi[k2])
         #self.imshow(Z, '%s-KL' % self.topic_tag, size=20, interpolation='nearest')
         self.pcolor(Z, '%s-KL' % self.topic_tag)
@@ -423,10 +423,10 @@ class DpmSummariser(object):
     def make_topic_word_intersection_heat_map(self):
         "Make a heat map representing the distances between transcriptional programs."
         K = self.statistics.num_topics_used
-        factors = [set(self.statistics.words_for_topic(k)) for k in xrange(K)]
+        factors = [set(self.statistics.words_for_topic(k)) for k in range(K)]
         Z = numpy.zeros((K, K))
-        for k1 in xrange(K):
-            for k2 in xrange(K):
+        for k1 in range(K):
+            for k2 in range(K):
                 if len(factors[k2]):
                     Z[k1, k2] = 1. - \
                         len(factors[k1].intersection(factors[k2])
@@ -439,10 +439,10 @@ class DpmSummariser(object):
         "Make a heat map representing the distances between transcriptional programs."
         K = self.statistics.num_topics_used
         documents = [set(self.statistics.documents_for_topic(k))
-                     for k in xrange(K)]
+                     for k in range(K)]
         Z = numpy.zeros((K, K))
-        for k1 in xrange(K):
-            for k2 in xrange(K):
+        for k1 in range(K):
+            for k2 in range(K):
                 if len(documents[k2]):
                     Z[k1, k2] = 1. - len(documents[k1].intersection(
                         documents[k2])) / float(len(documents[k2]))
@@ -458,7 +458,7 @@ class DpmSummariser(object):
         import pylab as P
         P.figure()
         heatmap_categories(self.dpm.exp_phi()[
-                           :K], category_names=self.word_ids, distribution_names=map(str, range(K)))
+                           :K], category_names=self.word_ids, distribution_names=list(map(str, list(range(K)))))
         self.save_fig('expected-phi')
         P.close()
 
@@ -472,8 +472,8 @@ class DpmSummariser(object):
             document_ids = self.document_ids
         else:
             document_ids = None
-        heatmap_categories(self.dpm.exp_theta()[:, :K], category_names=map(
-            str, range(K)), distribution_names=document_ids)
+        heatmap_categories(self.dpm.exp_theta()[:, :K], category_names=list(map(
+            str, list(range(K)))), distribution_names=document_ids)
         self.save_fig('expected-theta')
         P.close()
 
@@ -491,7 +491,7 @@ class DpmSummariser(object):
         logging.info('Creating topic size histogram')
         import pylab as P
         P.figure()
-        P.bar(xrange(self.statistics.num_topics_used),
+        P.bar(range(self.statistics.num_topics_used),
               self.dpm.counts.E_n_k[:self.statistics.num_topics_used])
         P.title('%s sizes' % self.topic_tag)
         P.xlabel('programs')
@@ -506,7 +506,7 @@ class DpmSummariser(object):
         import pylab as P
         P.figure()
         P.bar(
-            xrange(self.statistics.num_topics_used),
+            range(self.statistics.num_topics_used),
             numpy.log10(
                 self.dpm.counts.E_n_k[:self.statistics.num_topics_used]))
         P.title('%s sizes (log scale)' % self.topic_tag)
@@ -694,7 +694,7 @@ class DpmSummariser(object):
         def get_document_vertex(name):
             return get_vertex(name, 'triangle', 'green')
 
-        for k in xrange(self.statistics.num_topics_used):
+        for k in range(self.statistics.num_topics_used):
             name = 'TP: %d' % k
             topic_vertex = get_topic_vertex(name)
             for w in self.statistics.words_for_topic(k):
@@ -739,7 +739,7 @@ class DpmSummariser(object):
                   (k, len(self.statistics.words_for_topic(k)), self.word_tag))
 
         P.subplot(211)
-        P.bar(range(self.statistics.dpm.W),
+        P.bar(list(range(self.statistics.dpm.W)),
               self.statistics.dpm.counts.E_n_kw[k])
         P.title('Expected number %ss by %s.' %
                 (self.occurence_tag, self.word_tag))
@@ -748,7 +748,7 @@ class DpmSummariser(object):
         phi = self.dpm.exp_phi()[:self.statistics.num_topics_used]
         Phi = self.dpm.exp_Phi()
         phi_ratio = phi / Phi
-        P.bar(range(self.statistics.dpm.W), phi_ratio[k])
+        P.bar(list(range(self.statistics.dpm.W)), phi_ratio[k])
         P.title('Enrichment ratio over background %s distribution' %
                 self.word_tag)
 
@@ -761,16 +761,16 @@ class DpmSummariser(object):
         phi = self.dpm.exp_phi()
         assert phi.shape[0] == self.dpm.K
         with open('%s-phi.txt' % self.prefix, 'w') as out:
-            print >>out, ','.join(self.word_ids)
-            for k in xrange(self.dpm.K):
-                print >>out, ','.join(map(str, phi[k]))
+            print(','.join(self.word_ids), file=out)
+            for k in range(self.dpm.K):
+                print(','.join(map(str, phi[k])), file=out)
 
         theta = self.dpm.exp_theta()
         assert theta.shape[1] == self.dpm.K
         with open('%s-theta.txt' % self.prefix, 'w') as out:
-            print >>out, ','.join(self.document_ids)
-            for k in xrange(self.dpm.K):
-                print >>out, ','.join(map(str, theta[:, k]))
+            print(','.join(self.document_ids), file=out)
+            for k in range(self.dpm.K):
+                print(','.join(map(str, theta[:, k])), file=out)
 
     def write_posterior_enrichment(self):
         """
@@ -781,18 +781,18 @@ class DpmSummariser(object):
         phi_ratio = phi / Phi
         assert phi_ratio.shape[0] == self.dpm.K
         with open('%s-phi-ratio.txt' % self.prefix, 'w') as out:
-            print >>out, ','.join(self.word_ids)
-            for k in xrange(self.dpm.K):
-                print >>out, ','.join(map(str, phi_ratio[k]))
+            print(','.join(self.word_ids), file=out)
+            for k in range(self.dpm.K):
+                print(','.join(map(str, phi_ratio[k])), file=out)
 
         theta = self.dpm.exp_theta()
         Theta = self.dpm.exp_Theta()
         theta_ratio = theta / Theta
         assert theta_ratio.shape[1] == self.dpm.K
         with open('%s-theta-ratio.txt' % self.prefix, 'w') as out:
-            print >>out, ','.join(self.document_ids)
-            for k in xrange(self.dpm.K):
-                print >>out, ','.join(map(str, theta_ratio[:, k]))
+            print(','.join(self.document_ids), file=out)
+            for k in range(self.dpm.K):
+                print(','.join(map(str, theta_ratio[:, k])), file=out)
 
 
 class DpmInferenceHistory(object):
@@ -862,25 +862,25 @@ class DpmInferenceHistory(object):
         self._init_stat_fns()
 
     def iteration(self):
-        for figname, figurestats in self.stats.iteritems():
-            for subplotname, subplotstats in figurestats.iteritems():
-                for name, fn in subplotstats.iteritems():
+        for figname, figurestats in self.stats.items():
+            for subplotname, subplotstats in figurestats.items():
+                for name, fn in subplotstats.items():
                     self.history[name].append(fn())
         return -self.history['negative log likelihood'][-1]
 
     @pylab_ioff
     def plot(self):
         import pylab as P
-        for figname, figurestats in self.stats.iteritems():
+        for figname, figurestats in self.stats.items():
             P.figure(figsize=(12, 9))
             numsubplots = len(figurestats)
             nrows = int(numpy.sqrt(numsubplots))
             ncols = int(numsubplots / nrows)
             while nrows * ncols < numsubplots:
                 ncols += 1
-            for p, (subplotname, subplotstats) in enumerate(figurestats.iteritems()):
+            for p, (subplotname, subplotstats) in enumerate(figurestats.items()):
                 P.subplot(nrows, ncols, p + 1)
-                for name, fn in subplotstats.iteritems():
+                for name, fn in subplotstats.items():
                     P.plot(self.history[name], label=name)
                 P.legend()
                 P.xlabel('Iteration')

@@ -6,7 +6,7 @@
 Implements decision tree interface to the genepy genetic algorithm library
 """
 
-from decision import create_random_decision_tree, combine_trees, mutate_tree, prune_tree, print_tree
+from .decision import create_random_decision_tree, combine_trees, mutate_tree, prune_tree, print_tree
 
 
 class DecisionTreeSpecies(object):
@@ -58,4 +58,4 @@ class DecisionTreeSpecies(object):
                     if pre != post:
                         print_tree(pre_i)
                         print_tree(i)
-                        print '%d %d' % (pre, post)
+                        print('%d %d' % (pre, post))
